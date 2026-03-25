@@ -22,7 +22,7 @@ const AllTests = () => {
     const fetchTests = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:5000/api/test/all");
+        const res = await axios.get("https://gyani-vxc9.onrender.com/api/test/all");
         setTests(res.data);
       } catch (err) {
         console.error("Failed to load tests:", err);
