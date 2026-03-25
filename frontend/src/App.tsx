@@ -353,7 +353,7 @@ function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">{t.featuredCourses}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {courses.map((course, i) => (
+            {courses.map((course) => (
               <div 
                 key={course._id} 
                 className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer"
@@ -383,7 +383,7 @@ function Home() {
       <section className="max-w-6xl mx-auto px-4 py-16 bg-gray-50">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">{t.meetOurExperts}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teachers.map((teacher, i) => (
+          {teachers.map((teacher) => (
             <div key={teacher._id} className="bg-white rounded-3xl p-8 text-center hover:shadow-2xl hover:-translate-y-1 transition-all">
               <div className="w-32 h-32 mx-auto mb-6 overflow-hidden rounded-full border-4 border-white shadow-lg">
                 <img src={teacher.profileImage} alt={teacher.name} className="w-full h-full object-cover" />
