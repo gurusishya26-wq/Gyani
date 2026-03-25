@@ -32,7 +32,7 @@ export default function AddJob() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/admin/jobs", {
+      const res = await fetch("https://gyani-vxc9.onrender.com/api/admin/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
