@@ -29,7 +29,7 @@ const AttemptQuiz = () => {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/quiz/latest");
+        const res = await axios.get("https://gyani-vxc9.onrender.com/api/quiz/latest");
         setQuiz(res.data);
         setAnswers(new Array(res.data.questions.length).fill(-1));
       } catch (err) {
