@@ -292,7 +292,7 @@ function Home() {
         <div className="max-w-6xl mx-auto px-4 flex items-center gap-4">
           <div className="flex-1 overflow-hidden relative">
             <div className="animate-scroll flex gap-8 text-sm font-medium text-gray-700 whitespace-nowrap">
-              {[...Array(2)].map((_, i) => (
+              {[...Array(2)].map(() => (
                 <div key={i} className="flex items-center gap-6">
                   <span className="font-semibold text-gray-800 whitespace-nowrap">{t.dailyJobUpdates}</span>
                   <span className="text-gray-400">•</span>
