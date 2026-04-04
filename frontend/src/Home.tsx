@@ -166,7 +166,7 @@ function Home() {
 
     const user = result.user;
 
-    await axios.post("http://localhost:5000/api/save-user", {
+    await axios.post("https://gyani-vxc9.onrender.com/api/save-user", {
       name: user.displayName,
       email: user.email
     });
@@ -190,7 +190,7 @@ function Home() {
 
   const handleLogin = async () => {
   try {
-    const res = await axios.post("http://localhost:5000/api/login", {
+    const res = await axios.post("https://gyani-vxc9.onrender.com/api/login", {
       email,
       password
     });
@@ -212,7 +212,7 @@ function Home() {
 
 const handleRegister = async () => {
   try {
-    const res = await axios.post("http://localhost:5000/api/register", {
+    const res = await axios.post("https://gyani-vxc9.onrender.com/api/register", {
       name,
       email,
       password
