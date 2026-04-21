@@ -4,33 +4,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 import { auth, googleProvider } from "./firebase";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup
-} from "firebase/auth";
-
-
-type Course = {
-  _id: string;
-  title: string;
-  description: string;
-  coverImageUrl: string;
-  isPaid: boolean;
-  price?: number;
-  duration?: string;
-  rating?: number;
-};
-
-type Teacher = {
-  _id: string;
-  name: string;
-  experience: string;
-  bio: string;
-  profileImage?: string;
-  subjects: { name: string }[];
-};
-
+import { signInWithPopup } from "firebase/auth";
+import GoogleTranslate from "./components/GoogleTranslate";
 
 
 // ==================== TRANSLATIONS ====================
@@ -50,7 +25,7 @@ const translations = {
     joinLiveQuiz: "Join Live Quiz →",
 
     dailyJobUpdates: "Daily Updates",
-    viewAllJobs: "View All Jobs",
+    viewAllJobs: "View All Updates",
 
     heroTitle1: "Master Your Future with",
     heroTitle2: "Expert-Led Learning",
@@ -62,6 +37,8 @@ const translations = {
     categories: ["UPSC/IAS", "SSC CGL", "Banking Exams", "Teaching Exams", "Computer Science", "Skill Development"],
 
     featuredCourses: "Featured Courses",
+    exploreAll: "Explore All Courses",
+
     meetOurExperts: "Meet Our Expert Instructors",
     whyStudentsLove: "Why Students Love LearningHub",
     whySubtitle: "Everything you need to succeed — in one beautiful platform",
@@ -87,153 +64,55 @@ const translations = {
     legal: "Legal",
     followUs: "Follow Us",
     copyright: "© 2026 LearningHub. All rights reserved.",
-  },
-
-  hi: {
-    logo: "लर्निंगहब",
-    navCourses: "कोर्स",
-    navCategories: "श्रेणियाँ",
-    navTeachers: "शिक्षक",
-    joinNow: "अभी जुड़ें",
-
-    liveNow: "लाइव",
-    liveQuizTitle: "SSC मॉक टेस्ट #12",
-    studentsJoined: "2,340 छात्र जुड़े",
-    mediumLevel: "मध्यम स्तर",
-    left: "बाकी",
-    joinLiveQuiz: "लाइव क्विज़ में शामिल हों →",
-
-    dailyJobUpdates: "दैनिक नौकरी अपडेट्स",
-    viewAllJobs: "सभी नौकरियाँ देखें",
-
-    heroTitle1: "अपने भविष्य को",
-    heroTitle2: "विशेषज्ञ शिक्षण के साथ संवारें",
-    heroSubtitle: "50,000+ महत्वाकांक्षी छात्रों के साथ जुड़ें। लाइव क्लासेस, संरचित कोर्स, टेस्ट सीरीज़ और डाउट सॉल्विंग — सब एक जगह।",
-    startFree: "मुफ्त सीखना शुरू करें",
-    browseCourses: "कोर्स ब्राउज़ करें",
-
-    exploreLearningPaths: "लर्निंग पाथ्स एक्सप्लोर करें",
-    categories: ["UPSC/IAS", "SSC CGL", "बैंकिंग परीक्षाएँ", "टीचिंग परीक्षाएँ", "कंप्यूटर साइंस", "स्किल डेवलपमेंट"],
-
-    featuredCourses: "फीचर्ड कोर्स",
-    meetOurExperts: "हमारे विशेषज्ञ शिक्षकों से मिलें",
-    whyStudentsLove: "छात्र LearningHub को क्यों पसंद करते हैं",
-    whySubtitle: "सफलता के लिए आपको जो कुछ भी चाहिए — एक ही खूबसूरत प्लेटफॉर्म में",
-
-    readyToTransform: "अपनी करियर को बदलने के लिए तैयार हैं?",
-    joinThousands: "हजारों छात्रों के साथ जुड़ें जो पहले से ही सफल हो रहे हैं",
-    joinToday: "आज ही LearningHub जॉइन करें — यह फ्री है",
-
-    onlineTuition: "ऑनलाइन ट्यूशन क्लासेस",
-    chooseSubject: "अपना विषय और क्लास चुनें और सीखना शुरू करें",
-    mathematics: "गणित",
-    science: "विज्ञान",
-    english: "अंग्रेजी",
-    foreignLanguages: "विदेशी भाषाएँ",
-    computerScience: "कंप्यूटर साइंस",
-    startLearning: "सीखना शुरू करें",
-    exploreCourses: "भाषा कोर्स एक्सप्लोर करें",
-    startCoding: "कोडिंग यात्रा शुरू करें",
-
-    empoweringDreams: "गुणवत्तापूर्ण शिक्षा के माध्यम से सपनों को सशक्त बनाना।",
-    platform: "प्लेटफॉर्म",
-    company: "कंपनी",
-    legal: "कानूनी",
-    followUs: "हमें फॉलो करें",
-    copyright: "© 2026 LearningHub. सर्वाधिकार सुरक्षित।",
   }
 };
 
 function Home() {
   const navigate = useNavigate();
+
   const [showModal, setShowModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [timeLeft, setTimeLeft] = useState(15 * 60);
-  const [language, setLanguage] = useState<'en' | 'hi'>('en');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Self-Study Modal States
+  const [showSelfStudyModal, setShowSelfStudyModal] = useState(false);
+  const [step, setStep] = useState(1);           // 1 = class, 2 = subject
+  const [selectedClass, setSelectedClass] = useState<string | null>(null);
 
+  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Higher"];
 
-  const t = translations[language];
+  const subjects = [
+    "Mathematics", "Science", "Physics", "Chemistry", "Biology", 
+    "English", "Computer Science", "AI & Robotics", "History", "Geography"
+  ];
+  // ==================== HANDLERS ====================
+  const handleClassSelect = (cls: string) => {
+    setSelectedClass(cls);
+    setStep(2);
+  };
 
-  // ✅ FUNCTION GOES HERE (inside component)
-  const handleGoogleLogin = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
+  const handleSubjectSelect = (subject: string) => {
+    if (!selectedClass) return;
 
-    const user = result.user;
+    // Open courses in new tab with filters
+    const url = `/courses?type=self-study&class=${encodeURIComponent(selectedClass)}&subject=${encodeURIComponent(subject)}`;
+    window.open(url, '_blank');
+    
+    // Reset modal
+    setShowSelfStudyModal(false);
+    setStep(1);
+    setSelectedClass(null);
+  };
 
-    await axios.post("https://gyani-vxc9.onrender.com/api/save-user", {
-      name: user.displayName,
-      email: user.email
-    });
+  const closeSelfStudyModal = () => {
+    setShowSelfStudyModal(false);
+    setStep(1);
+    setSelectedClass(null);
+  };
 
-    localStorage.setItem("user", JSON.stringify({
-      name: user.displayName,
-      email: user.email
-    }));
+  const t = translations.en;
 
-
-    setShowModal(false);
-
-    // 🚀 REDIRECT
-    navigate("/dashboard");
-
-  } catch (error: any) {
-    alert(error.message);
-  }
-};
-
-
-  const handleLogin = async () => {
-  try {
-    const res = await axios.post("https://gyani-vxc9.onrender.com/api/login", {
-      email,
-      password
-    });
-
-    // Save token (optional)
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-
-    alert("Login successful");
-
-    setShowModal(false);
-
-    // 🚀 REDIRECT
-    navigate("/dashboard");
-
-  } catch (error: any) {
-    alert(error.response?.data?.msg || "Login failed");
-  }
-};
-
-const handleRegister = async () => {
-  try {
-    const res = await axios.post("https://gyani-vxc9.onrender.com/api/register", {
-      name,
-      email,
-      password
-    });
-
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-
-    alert("Registration successful");
-
-    setShowModal(false);
-
-    // 🚀 REDIRECT
-    navigate("/dashboard");
-
-  } catch (error: any) {
-    alert(error.response?.data?.msg || "Register failed");
-  }
-};
-
-
-  // Countdown
+  // Countdown Timer
   useEffect(() => {
     if (timeLeft <= 0) return;
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
@@ -246,43 +125,116 @@ const handleRegister = async () => {
     return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const courses: Course[] = [
-    { _id: "1", title: language === 'en' ? "UPSC CSE 2026 - Foundation Batch" : "UPSC CSE 2026 - फाउंडेशन बैच",
-      description: language === 'en' ? "Complete foundation with daily live classes, answer writing & full test series." : "दैनिक लाइव क्लासेस, उत्तर लेखन और पूर्ण टेस्ट सीरीज़ के साथ पूरा फाउंडेशन।",
-      coverImageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80", isPaid: true, price: 7999, duration: language === 'en' ? "12 months" : "12 महीने", rating: 4.9 },
-    { _id: "2", title: language === 'en' ? "SSC CGL 2026 - Complete Preparation" : "SSC CGL 2026 - पूर्ण तैयारी",
-      description: language === 'en' ? "Master Quant, English, Reasoning & GS with 500+ hours of expert content." : "क्वांट, इंग्लिश, रीजनिंग और GS में महारत हासिल करें।",
-      coverImageUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80", isPaid: true, price: 5499, duration: language === 'en' ? "8 months" : "8 महीने", rating: 4.8 },
-    { _id: "3", title: language === 'en' ? "Banking Awareness + IBPS PO/Clerk" : "बैंकिंग अवेयरनेस + IBPS PO/Clerk",
-      description: language === 'en' ? "Specialized course for current banking news and speed mathematics." : "वर्तमान बैंकिंग न्यूज़ और स्पीड गणित के लिए विशेष कोर्स।",
-      coverImageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80", isPaid: true, price: 3999, duration: language === 'en' ? "6 months" : "6 महीने", rating: 4.7 },
-    { _id: "4", title: language === 'en' ? "CTET & TET Teaching Exams 2026" : "CTET & TET टीचिंग एग्जाम 2026",
-      description: language === 'en' ? "Full preparation for CTET Paper 1 & 2 with pedagogy focus." : "CTET पेपर 1 और 2 की पूरी तैयारी।",
-      coverImageUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80", isPaid: false, duration: language === 'en' ? "4 months" : "4 महीने", rating: 4.9 },
+  // ==================== AUTH FUNCTIONS ====================
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      await axios.post("http://localhost:5000/api/save-user", {
+        name: user.displayName,
+        email: user.email
+      });
+
+      localStorage.setItem("user", JSON.stringify({
+        name: user.displayName,
+        email: user.email
+      }));
+
+      setShowModal(false);
+      navigate("/dashboard");
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  // ==================== COURSES DATA ====================
+  const courses = [
+    { 
+      _id: "1", 
+      title: "UPSC CSE 2026 - Foundation Batch",
+      description: "Complete foundation with daily live classes, answer writing & full test series by ex-IAS officers.",
+      coverImageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80",
+      isPaid: true, 
+      price: 7999, 
+      duration: "12 months",
+      rating: 4.9,
+      studentsEnrolled: 12400
+    },
+    { 
+      _id: "2", 
+      title: "SSC CGL 2026 - Complete Preparation",
+      description: "Master Quant, English, Reasoning & GS with 500+ hours of expert content.",
+      coverImageUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80",
+      isPaid: true, 
+      price: 5499, 
+      duration: "8 months",
+      rating: 4.8,
+      studentsEnrolled: 18500
+    },
+    { 
+      _id: "3", 
+      title: "IBPS PO & Clerk 2026 - Banking Excellence",
+      description: "Specialized course for Banking Awareness, Speed Math & Current Affairs.",
+      coverImageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80",
+      isPaid: true, 
+      price: 3999, 
+      duration: "6 months",
+      rating: 4.7,
+      studentsEnrolled: 9800
+    },
+    { 
+      _id: "4", 
+      title: "CTET & TET Teaching Exams 2026",
+      description: "Full preparation for CTET Paper 1 & 2 with focus on Pedagogy.",
+      coverImageUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80",
+      isPaid: false, 
+      price: 0,
+      duration: "4 months",
+      rating: 4.9,
+      studentsEnrolled: 15200
+    }
   ];
 
-  const teachers: Teacher[] = [
-    { _id: "t1", name: "Dr. Arvind Sharma", experience: language === 'en' ? "18+ years" : "18+ वर्ष",
-      bio: language === 'en' ? "Former IAS officer. Guided 800+ students into civil services." : "पूर्व IAS अधिकारी। 800+ छात्रों को सिविल सर्विसेज में सफलता दिलाई।",
+  // ==================== TEACHERS DATA ====================
+  const teachers = [
+    { 
+      _id: "t1", 
+      name: "Dr. Arvind Sharma", 
+      experience: "18+ years",
+      bio: "Former IAS officer. Guided 800+ students into civil services.",
       profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
-      subjects: [{ name: language === 'en' ? "Polity" : "राजनीति" }, { name: language === 'en' ? "Ethics" : "नैतिकता" }] },
-    { _id: "t2", name: "Priya Malhotra", experience: language === 'en' ? "12+ years" : "12+ वर्ष",
-      bio: language === 'en' ? "Ex-Bank PO and bestselling author for SSC & Banking exams." : "पूर्व बैंक PO और SSC एवं बैंकिंग परीक्षाओं की बेस्टसेलिंग लेखिका।",
+      subjects: [{ name: "Polity" }, { name: "Ethics" }] 
+    },
+    { 
+      _id: "t2", 
+      name: "Priya Malhotra", 
+      experience: "12+ years",
+      bio: "Ex-Bank PO and bestselling author for SSC & Banking exams.",
       profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-      subjects: [{ name: language === 'en' ? "Quant" : "क्वांट" }, { name: language === 'en' ? "Reasoning" : "रीजनिंग" }] },
-    { _id: "t3", name: "Rahul Verma", experience: language === 'en' ? "15+ years" : "15+ वर्ष",
-      bio: language === 'en' ? "Current Affairs expert and popular educator." : "करंट अफेयर्स विशेषज्ञ और लोकप्रिय शिक्षक।",
+      subjects: [{ name: "Quant" }, { name: "Reasoning" }] 
+    },
+    { 
+      _id: "t3", 
+      name: "Rahul Verma", 
+      experience: "15+ years",
+      bio: "Current Affairs expert and popular educator.",
       profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
-      subjects: [{ name: language === 'en' ? "Current Affairs" : "करंट अफेयर्स" }] },
-    { _id: "t4", name: "Anjali Kapoor", experience: language === 'en' ? "9+ years" : "9+ वर्ष",
-      bio: language === 'en' ? "CTET topper and pedagogy expert." : "CTET टॉपर और पेडागॉजी विशेषज्ञ।",
+      subjects: [{ name: "Current Affairs" }] 
+    },
+    { 
+      _id: "t4", 
+      name: "Anjali Kapoor", 
+      experience: "9+ years",
+      bio: "CTET topper and pedagogy expert.",
       profileImage: "https://images.unsplash.com/photo-1580894732441-8d7d2d4e4e4b?auto=format&fit=crop&q=80&w=400",
-      subjects: [{ name: language === 'en' ? "Pedagogy" : "शिक्षाशास्त्र" }] },
+      subjects: [{ name: "Pedagogy" }] 
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* ====================== LIVE QUIZ STRIP ====================== */}
+      {/* LIVE QUIZ STRIP */}
       <div className="bg-white border-b sticky top-0 z-[60] shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
@@ -312,7 +264,7 @@ const handleRegister = async () => {
         </div>
       </div>
 
-      {/* ====================== HEADER ====================== */}
+      {/* HEADER */}
       <header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
@@ -320,29 +272,14 @@ const handleRegister = async () => {
             <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-10 text-base font-medium text-gray-700">
             <a href="/courses" className="hover:text-[#5faae0] transition">{t.navCourses}</a>
             <a href="#" className="hover:text-[#5faae0] transition">{t.navCategories}</a>
-            <a href="#" className="hover:text-[#5faae0] transition">{t.navTeachers}</a>
+            <a href="/become-instructor" className="hover:text-[#5faae0] transition">{t.navTeachers}</a>
           </nav>
 
           <div className="flex items-center gap-4">
-            {/* Language Switcher */}
-            <div className="flex border border-gray-300 rounded-2xl overflow-hidden text-sm">
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-4 py-2 transition ${language === 'en' ? 'bg-[#5faae0] text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
-              >
-                English
-              </button>
-              <button
-                onClick={() => setLanguage('hi')}
-                className={`px-4 py-2 transition ${language === 'hi' ? 'bg-[#5faae0] text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
-              >
-                हिंदी
-              </button>
-            </div>
+            <GoogleTranslate />
 
             <button
               onClick={() => setShowModal(true)}
@@ -351,7 +288,6 @@ const handleRegister = async () => {
               {t.joinNow}
             </button>
 
-            {/* Mobile Menu Button */}
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)} 
               className="md:hidden text-3xl text-gray-700"
@@ -366,7 +302,7 @@ const handleRegister = async () => {
           <div className="md:hidden bg-white border-t px-4 py-5 flex flex-col gap-5 text-base font-medium">
             <a href="/courses" className="hover:text-[#5faae0]">{t.navCourses}</a>
             <a href="#" className="hover:text-[#5faae0]">{t.navCategories}</a>
-            <a href="#" className="hover:text-[#5faae0]">{t.navTeachers}</a>
+            <a href="/become-instructor" className="hover:text-[#5faae0]">{t.navTeachers}</a>
             <button 
               onClick={() => { setShowModal(true); setIsMenuOpen(false); }}
               className="bg-[#5faae0] text-white py-3.5 rounded-2xl font-semibold mt-2"
@@ -377,7 +313,7 @@ const handleRegister = async () => {
         )}
       </header>
 
-      {/* ====================== JOB UPDATES TICKER ====================== */}
+      {/* JOB UPDATES TICKER */}
       <div className="bg-white border-b shadow-sm py-4 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 flex items-center gap-4">
           <div className="flex-1 overflow-hidden relative">
@@ -395,16 +331,13 @@ const handleRegister = async () => {
               ))}
             </div>
           </div>
-          <button
-            onClick={() => navigate('/jobs')}
-            className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-2.5 rounded-2xl font-medium text-sm transition active:scale-95 whitespace-nowrap"
-          >
+          <button onClick={() => navigate('/jobs')} className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-2.5 rounded-2xl font-medium text-sm transition active:scale-95 whitespace-nowrap">
             {t.viewAllJobs}
           </button>
         </div>
       </div>
 
-      {/* ====================== HERO SECTION ====================== */}
+      {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-[#5faae0] via-[#4a9bd4] to-[#3b8ac7] text-white pt-12 pb-24 md:pt-16 md:pb-32">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
@@ -414,45 +347,185 @@ const handleRegister = async () => {
             </h1>
             <p className="text-lg md:text-xl text-white/90 max-w-lg">{t.heroSubtitle}</p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button onClick={() => setShowModal(true)} className="bg-white text-[#5faae0] font-semibold px-10 py-4 rounded-2xl text-lg shadow-xl hover:scale-105 transition"> {t.startFree} </button>
-              <button onClick={() => navigate('/courses')} className="border-2 border-white font-semibold px-10 py-4 rounded-2xl text-lg hover:scale-105 transition"> {t.browseCourses} </button>
+              <button 
+                onClick={() => setShowModal(true)} 
+                className="bg-white text-[#5faae0] font-semibold px-10 py-4 rounded-2xl text-lg shadow-xl hover:scale-105 transition"
+              > 
+                {t.startFree} 
+              </button>
+              <button 
+                onClick={() => navigate('/courses')} 
+                className="border-2 border-white font-semibold px-10 py-4 rounded-2xl text-lg hover:scale-105 transition"
+              > 
+                {t.browseCourses} 
+              </button>
             </div>
           </div>
           <div className="hidden md:block">
-            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80" alt="Learning Platform" className="rounded-3xl shadow-2xl border-8 border-white/30" />
+            <img 
+              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80" 
+              alt="Learning Platform" 
+              className="rounded-3xl shadow-2xl border-8 border-white/30" 
+            />
+          </div>
+        </div>
+      </section>
+      {/* ====================== LEARNING OPTIONS ====================== */}
+      <section className="max-w-6xl mx-auto px-4 py-16 bg-gray-50">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
+            {t.exploreLearningPaths}
+          </h2>
+          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+            Choose the learning path that suits you best
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Self-Study Card - With Modal Flow */}
+          <div 
+            onClick={() => setShowSelfStudyModal(true)}
+            className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
+          >
+            <div className="h-52 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+              <span className="text-7xl">📖</span>
+            </div>
+            <div className="p-8">
+              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Self-Study</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Learn at your own pace with comprehensive courses on emerging technologies like AI, Robotics, and more.
+              </p>
+            </div>
+          </div>
+
+          {/* Other cards remain the same (you can add onClick later if needed) */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
+            <div className="h-52 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+              <span className="text-7xl">🏛️</span>
+            </div>
+            <div className="p-8">
+              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Government Exams</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Structured preparation for competitive exams like UPSC, SSC, Banking, and more.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
+            <div className="h-52 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
+              <span className="text-7xl">💻</span>
+            </div>
+            <div className="p-8">
+              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Online Tuition</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Live interactive classes with experienced teachers from anywhere.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
+            <div className="h-52 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+              <span className="text-7xl">🤝</span>
+            </div>
+            <div className="p-8">
+              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Get Help</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Need guidance? Our mentors are here to help you choose the right path.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ====================== CATEGORIES ====================== */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">{t.exploreLearningPaths}</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {t.categories.map((cat, i) => (
-            <div key={i} className="bg-white p-8 rounded-3xl text-center hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer border border-gray-100">
-              <div className="text-5xl mb-4">📚</div>
-              <h3 className="font-semibold text-xl text-gray-800">{cat}</h3>
-              <p className="text-gray-500 mt-2">50+ {language === 'en' ? 'courses' : 'कोर्स'}</p>
+      
+      {/* ====================== SELF STUDY MODAL ====================== */}
+      {showSelfStudyModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="flex justify-between items-center border-b px-8 py-5">
+              <h3 className="text-2xl font-semibold text-gray-800">Self Study</h3>
+              <button 
+                onClick={closeSelfStudyModal}
+                className="text-gray-400 hover:text-gray-600 text-3xl leading-none"
+              >
+                ×
+              </button>
             </div>
-          ))}
+
+            {/* Body */}
+            <div className="p-8">
+              {step === 1 && (
+                <div>
+                  <p className="text-gray-600 mb-6 text-lg">Select your Class</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {classes.map((cls) => (
+                      <button
+                        key={cls}
+                        onClick={() => handleClassSelect(cls)}
+                        className="p-6 text-left border-2 border-gray-200 rounded-2xl hover:border-[#5faae0] hover:bg-blue-50 transition-all active:scale-[0.98] font-medium text-lg"
+                      >
+                        {cls}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {step === 2 && selectedClass && (
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <button 
+                      onClick={() => setStep(1)}
+                      className="text-[#5faae0] hover:text-blue-700 font-medium flex items-center gap-1"
+                    >
+                      ← Back
+                    </button>
+                    <p className="text-gray-600">
+                      Class <span className="font-semibold text-gray-800">{selectedClass}</span> — Choose Subject
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {subjects.map((subject) => (
+                      <button
+                        key={subject}
+                        onClick={() => handleSubjectSelect(subject)}
+                        className="w-full p-5 text-left border border-gray-200 rounded-2xl hover:border-[#5faae0] hover:bg-indigo-50 transition-all flex justify-between items-center group"
+                      >
+                        <span className="font-medium text-lg">{subject}</span>
+                        <span className="text-2xl text-gray-300 group-hover:text-[#5faae0] transition">→</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </section>
+      )}
 
       {/* ====================== FEATURED COURSES ====================== */}
       <section className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">{t.featuredCourses}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+            {t.featuredCourses}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {courses.map((course, i) => (
+            {courses.map((course) => (
               <div 
                 key={course._id} 
                 className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer"
                 onClick={() => navigate(`/course/${course._id}`)}
               >
                 <div className="relative h-52">
-                  <img src={course.coverImageUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  <img 
+                    src={course.coverImageUrl} 
+                    alt={course.title} 
+                    className="w-full h-full object-cover" 
+                  />
                   <div className={`absolute top-4 right-4 px-4 py-1 text-xs font-bold rounded-2xl ${course.isPaid ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                    {course.isPaid ? `₹${course.price}` : language === 'en' ? 'FREE' : 'मुफ्त'}
+                    {course.isPaid ? `₹${course.price}` : 'FREE'}
                   </div>
                 </div>
                 <div className="p-6">
@@ -471,16 +544,27 @@ const handleRegister = async () => {
 
       {/* ====================== TOP INSTRUCTORS ====================== */}
       <section className="max-w-6xl mx-auto px-4 py-16 bg-gray-50">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">{t.meetOurExperts}</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+          {t.meetOurExperts}
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teachers.map((teacher, i) => (
-            <div key={teacher._id} className="bg-white rounded-3xl p-8 text-center hover:shadow-2xl hover:-translate-y-1 transition-all">
+          {teachers.map((teacher) => (
+            <div 
+              key={teacher._id} 
+              className="bg-white rounded-3xl p-8 text-center hover:shadow-2xl hover:-translate-y-1 transition-all"
+            >
               <div className="w-32 h-32 mx-auto mb-6 overflow-hidden rounded-full border-4 border-white shadow-lg">
-                <img src={teacher.profileImage} alt={teacher.name} className="w-full h-full object-cover" />
+                <img 
+                  src={teacher.profileImage} 
+                  alt={teacher.name} 
+                  className="w-full h-full object-cover" 
+                />
               </div>
               <h3 className="font-bold text-2xl text-gray-800">{teacher.name}</h3>
               <p className="text-[#5faae0] font-medium">{teacher.experience}</p>
-              <p className="text-sm text-gray-500 mt-1">{teacher.subjects.map(s => s.name).join(" • ")}</p>
+              <p className="text-sm text-gray-500 mt-1">
+                {teacher.subjects.map(s => s.name).join(" • ")}
+              </p>
               <p className="mt-6 text-gray-600 text-sm line-clamp-3">{teacher.bio}</p>
             </div>
           ))}
@@ -490,16 +574,19 @@ const handleRegister = async () => {
       {/* ====================== WHY CHOOSE US ====================== */}
       <section className="bg-gray-100 py-16">
         <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">{t.whyStudentsLove}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">
+            {t.whyStudentsLove}
+          </h2>
           <p className="max-w-md mx-auto text-gray-600 mb-16">{t.whySubtitle}</p>
+          
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: "🎥", title: language === 'en' ? "Live + Recorded Classes" : "लाइव + रिकॉर्डेड क्लासेस", desc: language === 'en' ? "Learn in real-time or at your own pace" : "रियल-टाइम या अपनी गति से सीखें" },
-              { icon: "📝", title: language === 'en' ? "Test Series & Quizzes" : "टेस्ट सीरीज़ और क्विज़", desc: language === 'en' ? "Real exam pattern practice" : "वास्तविक परीक्षा पैटर्न का अभ्यास" },
-              { icon: "💬", title: language === 'en' ? "Instant Doubt Solving" : "तुरंत डाउट सॉल्विंग", desc: language === 'en' ? "Get answers from experts quickly" : "विशेषज्ञों से तुरंत जवाब पाएं" },
-              { icon: "🏆", title: language === 'en' ? "Certificates" : "सर्टिफिकेट", desc: language === 'en' ? "Industry-recognized completion certificates" : "उद्योग मान्यता प्राप्त सर्टिफिकेट" },
-              { icon: "📱", title: language === 'en' ? "Mobile Learning" : "मोबाइल लर्निंग", desc: language === 'en' ? "Learn anytime, anywhere" : "कहीं भी, कभी भी सीखें" },
-              { icon: "👥", title: language === 'en' ? "Community" : "समुदाय", desc: language === 'en' ? "Connect with peers and mentors" : "साथियों और मेंटर्स से जुड़ें" },
+              { icon: "🎥", title: "Live + Recorded Classes", desc: "Learn in real-time or at your own pace" },
+              { icon: "📝", title: "Test Series & Quizzes", desc: "Real exam pattern practice" },
+              { icon: "💬", title: "Instant Doubt Solving", desc: "Get answers from experts quickly" },
+              { icon: "🏆", title: "Certificates", desc: "Industry-recognized completion certificates" },
+              { icon: "📱", title: "Mobile Learning", desc: "Learn anytime, anywhere" },
+              { icon: "👥", title: "Community", desc: "Connect with peers and mentors" },
             ].map((f, i) => (
               <div key={i} className="bg-white p-10 rounded-3xl hover:shadow-xl hover:-translate-y-1 transition-all">
                 <div className="text-6xl mb-6">{f.icon}</div>
@@ -516,13 +603,16 @@ const handleRegister = async () => {
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">{t.readyToTransform}</h2>
           <p className="text-xl md:text-2xl mb-10 text-white/90">{t.joinThousands}</p>
-          <button onClick={() => setShowModal(true)} className="bg-[#e7c33d] hover:bg-yellow-400 text-gray-900 font-bold text-2xl px-16 py-6 rounded-3xl transition hover:scale-105 shadow-2xl">
+          <button 
+            onClick={() => setShowModal(true)} 
+            className="bg-[#e7c33d] hover:bg-yellow-400 text-gray-900 font-bold text-2xl px-16 py-6 rounded-3xl transition hover:scale-105 shadow-2xl"
+          >
             {t.joinToday}
           </button>
         </div>
       </section>
 
-      {/* ====================== ONLINE TUITION CLASSES - COMPLETE ====================== */}
+      {/* ====================== ONLINE TUITION CLASSES ====================== */}
       <section className="bg-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -531,7 +621,8 @@ const handleRegister = async () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Mathematics */}
+            
+            {/* Mathematics Card */}
             <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
@@ -546,13 +637,13 @@ const handleRegister = async () => {
                     </button>
                   ))}
                 </div>
-                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group-hover:scale-105">
+                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.startLearning} {t.mathematics} <span className="text-xl">→</span>
                 </button>
               </div>
             </div>
 
-            {/* Science */}
+            {/* Science Card */}
             <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
@@ -567,13 +658,13 @@ const handleRegister = async () => {
                     </button>
                   ))}
                 </div>
-                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group-hover:scale-105">
+                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.startLearning} {t.science} <span className="text-xl">→</span>
                 </button>
               </div>
             </div>
 
-            {/* English */}
+            {/* English Card */}
             <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
@@ -588,13 +679,13 @@ const handleRegister = async () => {
                     </button>
                   ))}
                 </div>
-                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group-hover:scale-105">
+                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.startLearning} {t.english} <span className="text-xl">→</span>
                 </button>
               </div>
             </div>
 
-            {/* Foreign Languages */}
+            {/* Foreign Languages Card */}
             <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
@@ -609,13 +700,13 @@ const handleRegister = async () => {
                     </button>
                   ))}
                 </div>
-                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group-hover:scale-105">
+                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.exploreCourses} <span className="text-xl">→</span>
                 </button>
               </div>
             </div>
 
-            {/* Computer Science */}
+            {/* Computer Science Card */}
             <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 md:col-span-2 lg:col-span-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
@@ -630,7 +721,7 @@ const handleRegister = async () => {
                     </button>
                   ))}
                 </div>
-                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group-hover:scale-105">
+                <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.startCoding} <span className="text-xl">→</span>
                 </button>
               </div>
@@ -649,15 +740,26 @@ const handleRegister = async () => {
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">{t.platform}</h4>
-              <ul className="space-y-2 text-sm"><li>{t.navCourses}</li><li>Live Classes</li><li>Test Series</li></ul>
+              <ul className="space-y-2 text-sm">
+                <li>{t.navCourses}</li>
+                <li>Live Classes</li>
+                <li>Test Series</li>
+              </ul>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">{t.company}</h4>
-              <ul className="space-y-2 text-sm"><li>About Us</li><li>Careers</li><li>Contact</li></ul>
+              <ul className="space-y-2 text-sm">
+                <li>About Us</li>
+                <li>Careers</li>
+                <li>Contact</li>
+              </ul>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">{t.legal}</h4>
-              <ul className="space-y-2 text-sm"><li>Privacy</li><li>Terms</li></ul>
+              <ul className="space-y-2 text-sm">
+                <li>Privacy</li>
+                <li>Terms</li>
+              </ul>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">{t.followUs}</h4>
@@ -670,192 +772,35 @@ const handleRegister = async () => {
         </div>
       </footer>
 
-      {/* FLOATING WHATSAPP */}
-      <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" 
-        className="fixed bottom-6 right-6 bg-[#25D366] hover:bg-[#20ba5a] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition hover:scale-110 z-50">
+      {/* FLOATING WHATSAPP BUTTON */}
+      <a 
+        href="https://wa.me/919876543210" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="fixed bottom-6 right-6 bg-[#25D366] hover:bg-[#20ba5a] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition hover:scale-110 z-50"
+      >
         <span className="text-3xl">💬</span>
       </a>
 
-      
-      {/* ====================== LOGIN / REGISTER MODAL ====================== */}
-    {showModal && (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden relative animate-scaleIn">
-        
-        {/* Tabs */}
-        <div className="flex border-b">
-            <button
-            onClick={() => setActiveTab('login')}
-            className={`flex-1 py-5 text-lg font-semibold transition ${
-                activeTab === 'login'
-                ? 'text-[#5faae0] border-b-4 border-[#5faae0]'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-            >
-            {language === 'en' ? 'Login' : 'लॉगिन'}
-            </button>
-            <button
-            onClick={() => setActiveTab('register')}
-            className={`flex-1 py-5 text-lg font-semibold transition ${
-                activeTab === 'register'
-                ? 'text-[#5faae0] border-b-4 border-[#5faae0]'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-            >
-            {language === 'en' ? 'Register' : 'रजिस्टर'}
-            </button>
-        </div>
-
-        <div className="p-8">
-            {activeTab === 'login' ? (
-            <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-center">
-                {language === 'en' ? 'Welcome Back' : 'वापस स्वागत है'}
-                </h3>
-
-                {/* Google Login */}
-                <button
+      {/* LOGIN MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-center mb-6">Welcome to LearningHub</h2>
+              <button 
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-3 py-4 px-5 border border-gray-300 rounded-2xl font-semibold text-lg hover:bg-gray-50 transition-colors"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.51h5.92c-.25 1.2-.99 2.23-2.08 2.9v3.02h3.37c1.97-1.81 3.1-4.48 3.1-7.68z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.37-2.6c-.93.63-2.12 1-3.91 1-3 0-5.55-2.03-6.46-4.75H1.93v2.98C3.74 20.87 7.6 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.54 13.99c-.3-.9-.47-1.85-.47-2.83s.17-1.93.47-2.83V7.18H1.93C1.34 8.66.99 10.3.99 12s.35 3.34.94 4.82l3.61-2.83z" />
-                    <path fill="#EA4335" d="M12 4.5c1.69 0 3.22.59 4.42 1.74l3.3-3.3C17.46 1.68 14.97.99 12 .99 7.6.99 3.74 3.12 1.93 7.18L5.54 9.99c.91-2.72 3.46-4.75 6.46-4.75z" />
-                </svg>
-                <span>{language === 'en' ? 'Continue with Google' : 'गूगल से जारी रखें'}</span>
-                </button>
-
-                {/* Divider */}
-                <div className="relative flex items-center py-2">
-                <div className="flex-grow border-t border-gray-300"></div>
-                <span className="px-4 text-sm text-gray-400 font-medium">
-                    {language === 'en' ? 'or' : 'या'}
-                </span>
-                <div className="flex-grow border-t border-gray-300"></div>
-                </div>
-
-                {/* Email Login */}
-                <div className="space-y-4">
-                <input
-                type="email"
-                placeholder={language === 'en' ? "Email Address" : "ईमेल पता"}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-300 focus:outline-none focus:border-[#5faae0] text-base"
-                />
-
-                <input
-                type="password"
-                placeholder={language === 'en' ? "Password" : "पासवर्ड"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-300 focus:outline-none focus:border-[#5faae0] text-base"
-                />
-                <button
-                onClick={handleLogin}
-                className="w-full bg-[#5faae0] text-white py-4 rounded-2xl font-semibold text-lg hover:bg-[#4a9bd4] transition"
-                >
-                {language === 'en' ? 'Login' : 'लॉगिन करें'}
-                </button>
-                </div>
+                className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 py-3.5 rounded-2xl font-medium mb-6"
+              >
+                Continue with Google
+              </button>
+              <div className="text-center text-sm text-gray-500">
+                More login options coming soon...
+              </div>
             </div>
-            ) : (
-            <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-center">
-                {language === 'en' ? 'Create New Account' : 'नया खाता बनाएँ'}
-                </h3>
-
-                {/* Sign up with email */}
-                <div className="space-y-4">
-                <p className="text-sm font-medium text-gray-500">
-                    {language === 'en' ? 'Sign up with email' : 'ईमेल से साइन अप करें'}
-                </p>
-
-                <input
-                type="text"
-                placeholder={language === 'en' ? "Full Name" : "पूरा नाम"}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-300"
-                />
-
-                <input
-                type="email"
-                placeholder={language === 'en' ? "Email Address" : "ईमेल पता"}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-300"
-                />
-
-                <input
-                type="password"
-                placeholder={language === 'en' ? "Password" : "पासवर्ड"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-300"
-                />
-
-                <button
-                onClick={handleRegister}
-                className="w-full bg-[#5faae0] text-white py-4 rounded-2xl font-semibold text-lg hover:bg-[#4a9bd4] transition"
-                >
-                {language === 'en' ? 'Continue' : 'जारी रखें'}
-                </button>
-                </div>
-
-                {/* Other sign up options */}
-                <div>
-                <p className="text-center text-sm font-medium text-gray-400 mb-3">
-                    {language === 'en' ? 'Other sign up options' : 'अन्य साइन अप विकल्प'}
-                </p>
-
-                <button
-                onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-3 py-4 px-5 border border-gray-300 rounded-2xl font-semibold text-lg hover:bg-gray-50 transition-colors"
-                > 
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.51h5.92c-.25 1.2-.99 2.23-2.08 2.9v3.02h3.37c1.97-1.81 3.1-4.48 3.1-7.68z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.37-2.6c-.93.63-2.12 1-3.91 1-3 0-5.55-2.03-6.46-4.75H1.93v2.98C3.74 20.87 7.6 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.54 13.99c-.3-.9-.47-1.85-.47-2.83s.17-1.93.47-2.83V7.18H1.93C1.34 8.66.99 10.3.99 12s.35 3.34.94 4.82l3.61-2.83z" />
-                    <path fill="#EA4335" d="M12 4.5c1.69 0 3.22.59 4.42 1.74l3.3-3.3C17.46 1.68 14.97.99 12 .99 7.6.99 3.74 3.12 1.93 7.18L5.54 9.99c.91-2.72 3.46-4.75 6.46-4.75z" />
-                    </svg>
-                    <span>{language === 'en' ? 'Google' : 'गूगल'}</span>
-                </button>
-                </div>
-
-                {/* Terms */}
-                <div className="text-center text-xs text-gray-500 pt-4 border-t">
-                {language === 'en' 
-                    ? 'By signing up, you agree to our Terms of Use and Privacy Policy.'
-                    : 'साइन अप करके, आप हमारे उपयोग की शर्तों और गोपनीयता नीति से सहमत होते हैं।'
-                }
-                <br />
-                <span className="mt-3 block">
-                    {language === 'en' ? 'Already have an account?' : 'पहले से ही खाता है?'}{' '}
-                    <button
-                    onClick={() => setActiveTab('login')}
-                    className="text-[#5faae0] font-semibold hover:underline"
-                    >
-                    {language === 'en' ? 'Log in' : 'लॉगिन करें'}
-                    </button>
-                </span>
-                </div>
-            </div>
-            )}
+          </div>
         </div>
-
-        {/* Close Button */}
-        <button
-            onClick={() => setShowModal(false)}
-            className="absolute top-4 right-4 text-3xl text-gray-400 hover:text-gray-600 transition"
-        >
-            ✕
-        </button>
-        </div>
-    </div>
-    )}
+      )}
     </div>
   );
 }

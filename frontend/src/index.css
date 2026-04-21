@@ -19,3 +19,21 @@
 .animate-scroll:hover {
   animation-play-state: paused;
 }
+
+
+/* Hide the "Powered by Google" and make it cleaner */
+.goog-te-gadget {
+  font-size: 0 !important;
+}
+
+.goog-te-gadget > span > a {
+  display: none !important;
+}
+
+.goog-te-gadget .goog-te-combo {
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  font-size: 14px;
+}
