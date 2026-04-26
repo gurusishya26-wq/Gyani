@@ -1,225 +1,229 @@
-// src/pages/Courses.tsx
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
+import { FileText, CheckCircle, ChevronDown, ChevronUp, Play } from 'lucide-react';
 
-const Courses = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+const CoursePage = () => {
+  const [activeChapter, setActiveChapter] = useState<number | null>(null);
+  const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState<string>(
+    "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4"
+  );
 
-  const type = searchParams.get('type') || '';
-  const selectedClass = searchParams.get('class') || '';
-  const selectedSubject = searchParams.get('subject') || '';
+  const course = {
+    title: "Mathematics Foundation for Class 10",
+    description: "Master all important concepts of Class 10 Mathematics with easy explanations, solved examples, and practice tests. Completely Free!",
+  };
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('popular'); // popular, price-low, price-high, rating
-
-  // Sample courses data (you can later fetch from backend)
-  const allCourses = [
+  const chapters = [
     {
-      _id: "c1",
-      title: "Mathematics Mastery for Class 10",
-      subject: "Mathematics",
-      class: "Class 10",
-      description: "Complete coverage of CBSE & State Board syllabus with 300+ practice questions and doubt sessions.",
-      coverImageUrl: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80",
-      price: 2999,
-      rating: 4.9,
-      studentsEnrolled: 12400,
-      duration: "6 months",
-      isPaid: true,
-      level: "Intermediate"
+      id: 1,
+      title: "Chapter 1: Real Numbers",
+      duration: "6 hours",
+      lessons: [
+        { 
+          id: 101, 
+          title: "Introduction to Real Numbers", 
+          duration: "28 min",
+          videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4"
+        },
+        { 
+          id: 102, 
+          title: "Euclid's Division Lemma", 
+          duration: "35 min",
+          videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4"
+        },
+        { 
+          id: 103, 
+          title: "Fundamental Theorem of Arithmetic", 
+          duration: "42 min",
+          videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4"
+        },
+      ],
+      pdfNotes: "real-numbers-notes.pdf",
     },
     {
-      _id: "c2",
-      title: "Physics for Class 11 & 12 - JEE Foundation",
-      subject: "Physics",
-      class: "Class 11",
-      description: "Build strong concepts for Board exams and JEE with live problem solving.",
-      coverImageUrl: "https://images.unsplash.com/photo-1636466762480-9b3b6b0b0b0b?auto=format&fit=crop&q=80",
-      price: 4499,
-      rating: 4.8,
-      studentsEnrolled: 8900,
-      duration: "8 months",
-      isPaid: true,
-      level: "Advanced"
+      id: 2,
+      title: "Chapter 2: Polynomials",
+      duration: "8 hours",
+      lessons: [
+        { 
+          id: 201, 
+          title: "Introduction to Polynomials", 
+          duration: "25 min",
+          videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4"
+        },
+        { 
+          id: 202, 
+          title: "Zeros of a Polynomial", 
+          duration: "38 min",
+          videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4"
+        },
+      ],
+      pdfNotes: "polynomials-notes.pdf",
     },
-    {
-      _id: "c3",
-      title: "AI & Robotics for Beginners",
-      subject: "AI & Robotics",
-      class: "Higher",
-      description: "Introduction to Artificial Intelligence, Machine Learning and Robotics with hands-on projects.",
-      coverImageUrl: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80",
-      price: 1999,
-      rating: 4.7,
-      studentsEnrolled: 5600,
-      duration: "4 months",
-      isPaid: true,
-      level: "Beginner"
-    },
-    {
-      _id: "c4",
-      title: "English Grammar & Comprehension - Class 9",
-      subject: "English",
-      class: "Class 9",
-      description: "Improve your English skills with interactive lessons and weekly tests.",
-      coverImageUrl: "https://images.unsplash.com/photo-1453928582365-b7f9d4d2b4e3?auto=format&fit=crop&q=80",
-      price: 0,
-      rating: 4.6,
-      studentsEnrolled: 15200,
-      duration: "3 months",
-      isPaid: false,
-      level: "Intermediate"
-    },
-    // Add more courses as needed
   ];
 
-  // Filter courses based on query params and search
-  const filteredCourses = useMemo(() => {
-    let result = [...allCourses];
+  // Play lesson video in main player
+  const playLessonVideo = (videoUrl: string) => {
+    setCurrentVideoUrl(videoUrl);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    // Filter by subject and class from modal
-    if (selectedSubject) {
-      result = result.filter(course => 
-        course.subject.toLowerCase() === selectedSubject.toLowerCase()
-      );
+  const markLessonComplete = (lessonId: number) => {
+    if (!completedLessons.includes(lessonId)) {
+      setCompletedLessons([...completedLessons, lessonId]);
     }
-    if (selectedClass && selectedClass !== "Higher") {
-      result = result.filter(course => 
-        course.class.toLowerCase() === selectedClass.toLowerCase()
-      );
-    }
+  };
 
-    // Search filter
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(course =>
-        course.title.toLowerCase().includes(term) ||
-        course.description.toLowerCase().includes(term)
-      );
-    }
-
-    // Sorting
-    if (sortBy === 'price-low') {
-      result.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-high') {
-      result.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'rating') {
-      result.sort((a, b) => b.rating - a.rating);
-    } else {
-      // popular (default)
-      result.sort((a, b) => b.studentsEnrolled - a.studentsEnrolled);
-    }
-
-    return result;
-  }, [allCourses, selectedSubject, selectedClass, searchTerm, sortBy]);
-
-  const pageTitle = selectedSubject && selectedClass 
-    ? `${selectedSubject} - ${selectedClass}` 
-    : "All Self-Study Courses";
+  // Open Test in NEW TAB
+  const openTestInNewTab = (type: 'lesson' | 'chapter', id: number) => {
+    const testUrl = `/test?type=${type}&courseId=${course.title}&id=${id}`;
+    window.open(testUrl, '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate(-1)}
-              className="text-2xl hover:scale-110 transition"
-            >
-              ←
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
-              <p className="text-sm text-gray-500">Self Study • {filteredCourses.length} courses found</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              placeholder="Search courses..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-5 py-3 border border-gray-300 rounded-2xl w-80 focus:outline-none focus:border-[#5faae0]"
-            />
-
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-[#5faae0]"
-            >
-              <option value="popular">Most Popular</option>
-              <option value="rating">Highest Rated</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
-          </div>
+      <div className="bg-white border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-5">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{course.title}</h1>
+          <span className="inline-block mt-2 bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-medium">
+            FREE COURSE
+          </span>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        {filteredCourses.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-6xl mb-4">😕</p>
-            <h3 className="text-2xl font-semibold mb-2">No courses found</h3>
-            <p className="text-gray-600">Try changing your filters or search term.</p>
+      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Side - Video Player + Description */}
+        <div className="lg:col-span-8 space-y-10">
+          
+          {/* Main Video Player */}
+          <div className="bg-black rounded-3xl overflow-hidden shadow-2xl aspect-video">
+            <video
+              key={currentVideoUrl}
+              controls
+              autoPlay
+              className="w-full h-full"
+            >
+              <source src={currentVideoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.map((course) => (
-              <div 
-                key={course._id}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer border border-gray-100"
-                onClick={() => navigate(`/course/${course._id}`)}
-              >
-                <div className="relative h-56">
-                  <img 
-                    src={course.coverImageUrl} 
-                    alt={course.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className={`absolute top-4 right-4 px-4 py-1.5 text-xs font-bold rounded-2xl shadow-md
-                    ${course.isPaid ? 'bg-[#5faae0] text-white' : 'bg-emerald-500 text-white'}`}>
-                    {course.isPaid ? `₹${course.price}` : 'FREE'}
-                  </div>
-                </div>
 
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-xs font-medium px-3 py-1 bg-gray-100 text-gray-600 rounded-full">
-                      {course.class}
-                    </span>
-                    <div className="flex items-center text-amber-500 text-sm">
-                      ★ {course.rating}
-                    </div>
-                  </div>
-
-                  <h3 className="font-semibold text-xl leading-tight mb-3 line-clamp-2">
-                    {course.title}
-                  </h3>
-
-                  <p className="text-gray-600 text-sm line-clamp-3 mb-5">
-                    {course.description}
-                  </p>
-
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="text-gray-500">
-                      {course.duration}
-                    </div>
-                    <div className="text-gray-500">
-                      👥 {course.studentsEnrolled.toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Course Description */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 className="text-2xl font-semibold mb-4">About This Course</h2>
+            <p className="text-gray-700 leading-relaxed text-lg">
+              {course.description}
+            </p>
           </div>
-        )}
+        </div>
+
+        {/* Right Side - Chapters & Lessons */}
+        <div className="lg:col-span-4">
+          <div className="bg-white rounded-3xl shadow-sm border sticky top-24 overflow-hidden">
+            <div className="p-6 border-b bg-gray-50">
+              <h2 className="text-xl font-semibold text-gray-900">Course Curriculum</h2>
+              <p className="text-sm text-gray-500 mt-1">2 Chapters • 5 Lessons</p>
+            </div>
+
+            <div className="divide-y">
+              {chapters.map((chapter, index) => (
+                <div key={chapter.id}>
+                  {/* Chapter Header */}
+                  <div
+                    onClick={() => setActiveChapter(activeChapter === index ? null : index)}
+                    className="p-6 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-all"
+                  >
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-gray-800">{chapter.title}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{chapter.duration}</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          openTestInNewTab('chapter', chapter.id); 
+                        }}
+                        className="text-xs px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-xl transition"
+                      >
+                        Chapter Test
+                      </button>
+                      <a
+                        href={`/notes/${chapter.pdfNotes}`}
+                        target="_blank"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <FileText className="w-5 h-5" />
+                      </a>
+                      {activeChapter === index ? 
+                        <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+                        <ChevronDown className="w-5 h-5 text-gray-400" />
+                      }
+                    </div>
+                  </div>
+
+                  {/* Lessons List */}
+                  {activeChapter === index && (
+                    <div className="px-6 pb-6 bg-gray-50">
+                      {chapter.lessons.map((lesson) => (
+                        <div 
+                          key={lesson.id} 
+                          className="flex items-center justify-between py-4 border-b last:border-none group"
+                        >
+                          <div 
+                            onClick={() => playLessonVideo(lesson.videoUrl)}
+                            className="flex items-center gap-4 flex-1 cursor-pointer hover:text-[#5faae0] transition"
+                          >
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2
+                              ${completedLessons.includes(lesson.id) 
+                                ? 'bg-green-500 border-green-500' 
+                                : 'border-gray-300 group-hover:border-[#5faae0]'}`}>
+                              {completedLessons.includes(lesson.id) ? 
+                                <CheckCircle className="w-4 h-4 text-white" /> : 
+                                <Play className="w-4 h-4 text-gray-400" />
+                              }
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-800 group-hover:text-[#5faae0]">{lesson.title}</p>
+                              <p className="text-xs text-gray-500">{lesson.duration}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                markLessonComplete(lesson.id); 
+                              }}
+                              className="text-xs px-3 py-1.5 border border-gray-300 hover:bg-white rounded-lg transition"
+                            >
+                              Done
+                            </button>
+                            <button
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                openTestInNewTab('lesson', lesson.id); 
+                              }}
+                              className="text-xs px-4 py-1.5 bg-[#5faae0] hover:bg-[#4a9bd4] text-white rounded-lg transition"
+                            >
+                              MCQ Test
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Courses;
+export default CoursePage;

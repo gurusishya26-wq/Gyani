@@ -64,11 +64,22 @@ const translations = {
     legal: "Legal",
     followUs: "Follow Us",
     copyright: "© 2026 LearningHub. All rights reserved.",
+
+    startFreeTrial: "Start Free Trial",
+    signIn: "Sign In",
   }
 };
 
 function Home() {
   const navigate = useNavigate();
+
+  // For class section (new UI)
+const [selectedClassLevel, setSelectedClassLevel] = useState<number | null>(null);
+
+const [selectedCompetitiveExam, setSelectedCompetitiveExam] = useState<string | null>(null);
+
+// For modal (self-study)
+const [modalClass, setModalClass] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
@@ -87,27 +98,27 @@ function Home() {
   ];
   // ==================== HANDLERS ====================
   const handleClassSelect = (cls: string) => {
-    setSelectedClass(cls);
+    setModalClass(cls);
     setStep(2);
   };
 
   const handleSubjectSelect = (subject: string) => {
-    if (!selectedClass) return;
+    if (!modalClass) return;
 
     // Open courses in new tab with filters
-    const url = `/courses?type=self-study&class=${encodeURIComponent(selectedClass)}&subject=${encodeURIComponent(subject)}`;
+    const url = `/courses?type=self-study&class=${encodeURIComponent(modalClass)}&subject=${encodeURIComponent(subject)}`;
     window.open(url, '_blank');
     
     // Reset modal
     setShowSelfStudyModal(false);
     setStep(1);
-    setSelectedClass(null);
+    setModalClass(null);
   };
 
   const closeSelfStudyModal = () => {
     setShowSelfStudyModal(false);
     setStep(1);
-    setSelectedClass(null);
+    setModalClass(null);
   };
 
   const t = translations.en;
@@ -264,30 +275,77 @@ function Home() {
         </div>
       </div>
 
+      
       {/* HEADER */}
       <header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-11 h-11 bg-[#5faae0] rounded-3xl flex items-center justify-center text-white font-bold text-3xl shadow-inner">LH</div>
-            <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
+          {/* Logo */}
+          <div 
+            className="flex items-center gap-3 cursor-pointer" 
+            onClick={() => navigate('/')}
+          >
+            <div className="w-11 h-11 bg-[#5faae0] rounded-3xl flex items-center justify-center text-white font-bold text-3xl shadow-inner">
+              LH
+            </div>
+            <span className="font-bold text-2xl tracking-tighter text-gray-900">
+              {t.logo}
+            </span>
           </div>
 
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-10 text-base font-medium text-gray-700">
-            <a href="/courses" className="hover:text-[#5faae0] transition">{t.navCourses}</a>
-            <a href="#" className="hover:text-[#5faae0] transition">{t.navCategories}</a>
-            <a href="/become-instructor" className="hover:text-[#5faae0] transition">{t.navTeachers}</a>
+            <a href="/courses" className="hover:text-[#5faae0] transition-colors">
+              {t.navCourses}
+            </a>
+            
+            <a href="#" className="hover:text-[#5faae0] transition-colors">
+              {t.navCategories}
+            </a>
+
+            {/* Teachers link - Now scrolls to the section */}
+            <a 
+              href="#teachers" 
+              onClick={(e) => {
+                e.preventDefault();           // Prevent default jump
+                const teachersSection = document.getElementById('teachers');
+                if (teachersSection) {
+                  teachersSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }
+              }}
+              className="hover:text-[#5faae0] transition-colors cursor-pointer"
+            >
+              {t.navTeachers}
+            </a>
           </nav>
 
-          <div className="flex items-center gap-4">
+          {/* Right Side */}
+          <div className="flex items-center gap-3">
             <GoogleTranslate />
 
-            <button
-              onClick={() => setShowModal(true)}
-              className="hidden md:block bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-8 py-3 rounded-2xl font-semibold transition active:scale-95"
-            >
-              {t.joinNow}
-            </button>
+            {/* Desktop Buttons */}
+            <div className="hidden md:flex items-center gap-3">
+              <button
+                onClick={() => setShowModal(true)}
+                className="bg-white border-2 border-[#5faae0] hover:bg-[#f0f9ff] text-[#5faae0] px-6 py-3 rounded-2xl font-semibold transition active:scale-95 whitespace-nowrap"
+              >
+                {t.startFreeTrial || "Start Free Trial"}
+              </button>
 
+              <button
+                onClick={() => {
+                  console.log("Sign In clicked");
+                  // TODO: Add your Sign In logic (navigate('/login') etc.)
+                }}
+                className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-3 rounded-2xl font-semibold transition active:scale-95 whitespace-nowrap"
+              >
+                {t.signIn || "Sign In"}
+              </button>
+            </div>
+
+            {/* Mobile Hamburger */}
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)} 
               className="md:hidden text-3xl text-gray-700"
@@ -300,15 +358,46 @@ function Home() {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t px-4 py-5 flex flex-col gap-5 text-base font-medium">
-            <a href="/courses" className="hover:text-[#5faae0]">{t.navCourses}</a>
+            <a href="/courses" className="hover:text-[#5faae0]"> {t.navCourses}</a>
             <a href="#" className="hover:text-[#5faae0]">{t.navCategories}</a>
-            <a href="/become-instructor" className="hover:text-[#5faae0]">{t.navTeachers}</a>
-            <button 
-              onClick={() => { setShowModal(true); setIsMenuOpen(false); }}
-              className="bg-[#5faae0] text-white py-3.5 rounded-2xl font-semibold mt-2"
+            
+            {/* Teachers in Mobile Menu */}
+            <a 
+              href="#teachers"
+              onClick={(e) => {
+                e.preventDefault();
+                const teachersSection = document.getElementById('teachers');
+                if (teachersSection) {
+                  teachersSection.scrollIntoView({ behavior: 'smooth' });
+                  setIsMenuOpen(false);        // Close menu after click
+                }
+              }}
+              className="hover:text-[#5faae0] cursor-pointer"
             >
-              {t.joinNow}
-            </button>
+              {t.navTeachers}
+            </a>
+
+            <div className="flex flex-col gap-3 mt-4">
+              <button 
+                onClick={() => { 
+                  setShowModal(true); 
+                  setIsMenuOpen(false); 
+                }}
+                className="bg-white border-2 border-[#5faae0] text-[#5faae0] py-3.5 rounded-2xl font-semibold"
+              >
+                {t.startFreeTrial || "Start Free Trial"}
+              </button>
+
+              <button 
+                onClick={() => { 
+                  // TODO: Add Sign In logic
+                  setIsMenuOpen(false); 
+                }}
+                className="bg-[#5faae0] text-white py-3.5 rounded-2xl font-semibold"
+              >
+                {t.signIn || "Sign In"}
+              </button>
+            </div>
           </div>
         )}
       </header>
@@ -320,7 +409,7 @@ function Home() {
             <div className="animate-scroll flex gap-8 text-sm font-medium text-gray-700 whitespace-nowrap">
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex items-center gap-6">
-                  <span className="font-semibold text-gray-800 whitespace-nowrap">{t.dailyJobUpdates}</span>
+                  <span className="font-semibold text-rose-600 whitespace-nowrap">{t.dailyJobUpdates}</span>
                   <span className="text-gray-400">•</span>
                   <span onClick={() => navigate('/jobs')} className="cursor-pointer hover:text-[#5faae0] transition-colors whitespace-nowrap">SSC भर्ती 2026 – Apply Now</span>
                   <span className="text-gray-400">•</span>
@@ -472,7 +561,7 @@ function Home() {
                 </div>
               )}
 
-              {step === 2 && selectedClass && (
+              {step === 2 && modalClass && (
                 <div>
                   <div className="flex items-center gap-3 mb-6">
                     <button 
@@ -482,7 +571,7 @@ function Home() {
                       ← Back
                     </button>
                     <p className="text-gray-600">
-                      Class <span className="font-semibold text-gray-800">{selectedClass}</span> — Choose Subject
+                      Class <span className="font-semibold text-gray-800">{modalClass}</span> — Choose Subject
                     </p>
                   </div>
 
@@ -505,71 +594,231 @@ function Home() {
         </div>
       )}
 
-      {/* ====================== FEATURED COURSES ====================== */}
+      {/* ====================== CLASS BASED LEARNING ====================== */}
       <section className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-            {t.featuredCourses}
+            Choose Your Class
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {courses.map((course) => (
-              <div 
-                key={course._id} 
-                className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer"
-                onClick={() => navigate(`/course/${course._id}`)}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+            {[8, 9, 10, 11, 12].map((cls) => (
+              <div
+                key={cls}
+                onClick={() => setSelectedClassLevel(cls)}
+                className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 active:scale-[0.98]"
               >
-                <div className="relative h-52">
-                  <img 
-                    src={course.coverImageUrl} 
-                    alt={course.title} 
-                    className="w-full h-full object-cover" 
+                <div className="h-48 bg-gradient-to-br from-[#5faae0] to-[#3b8bc2] relative overflow-hidden">
+                  {/* Improved fallback image - educational Indian context */}
+                  <img
+                    src={`https://picsum.photos/id/${60 + cls}/600/400`}
+                    alt={`Class ${cls} students studying`}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80";
+                    }}
                   />
-                  <div className={`absolute top-4 right-4 px-4 py-1 text-xs font-bold rounded-2xl ${course.isPaid ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                    {course.isPaid ? `₹${course.price}` : 'FREE'}
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+                  
+                  <div className="absolute top-4 right-4 bg-white text-[#5faae0] font-bold text-3xl w-14 h-14 flex items-center justify-center rounded-2xl shadow-md">
+                    {cls}
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="font-bold text-xl line-clamp-2 mb-3">{course.title}</h3>
-                  <p className="text-gray-600 text-sm line-clamp-2 mb-5">{course.description}</p>
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center gap-1 text-amber-500">★ {course.rating}</div>
-                    <span className="text-gray-500">{course.duration}</span>
-                  </div>
+
+                <div className="p-6 text-center">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Class {cls}</h3>
+                  <p className="text-gray-600 text-sm">
+                    Comprehensive courses designed for Class {cls} students
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
+
+        {/* SUBJECT MODAL - Expanded subjects */}
+        {selectedClassLevel && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+            <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
+              <div className="p-6 border-b flex items-center justify-between bg-gray-50 rounded-t-3xl">
+                <h3 className="text-2xl font-bold text-gray-800">
+                  Subjects for Class {selectedClassLevel}
+                </h3>
+                <button onClick={() => setSelectedClassLevel(null)} className="text-gray-500 hover:text-gray-700 text-3xl leading-none">
+                  ×
+                </button>
+              </div>
+
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[65vh]">
+                {[
+                  { name: "Mathematics", icon: "📐" },
+                  { name: "Science", icon: "🧪" },
+                  { name: "English", icon: "📖" },
+                  { name: "Hindi", icon: "🇮🇳" },
+                  { name: "Social Science", icon: "🌍" },
+                  { name: "Computer Science", icon: "💻" },
+                ].map((subject) => (
+                  <div
+                    key={subject.name}
+                    onClick={() => {
+                      const url = `/courses?class=${selectedClassLevel}&subject=${subject.name.toLowerCase()}`;
+                      window.open(url, "_blank");
+                    }}
+                    className="flex items-center gap-4 p-5 bg-gray-50 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 rounded-2xl cursor-pointer transition-all group"
+                  >
+                    <div className="text-4xl group-hover:scale-110 transition-transform duration-300">
+                      {subject.icon}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-lg text-gray-800 group-hover:text-emerald-700 transition-colors">
+                        {subject.name}
+                      </p>
+                      <p className="text-sm text-gray-500">Explore courses →</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-6 border-t bg-gray-50 rounded-b-3xl flex justify-center">
+                <button onClick={() => setSelectedClassLevel(null)} className="px-10 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
-      {/* ====================== TOP INSTRUCTORS ====================== */}
-      <section className="max-w-6xl mx-auto px-4 py-16 bg-gray-50">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-          {t.meetOurExperts}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teachers.map((teacher) => (
-            <div 
-              key={teacher._id} 
-              className="bg-white rounded-3xl p-8 text-center hover:shadow-2xl hover:-translate-y-1 transition-all"
-            >
-              <div className="w-32 h-32 mx-auto mb-6 overflow-hidden rounded-full border-4 border-white shadow-lg">
-                <img 
-                  src={teacher.profileImage} 
-                  alt={teacher.name} 
-                  className="w-full h-full object-cover" 
-                />
+      {/* ====================== COMPETITIVE EXAMS ====================== */}
+      <section className="bg-gray-50 py-16">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">
+            Competitive Exams
+          </h2>
+          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+            Targeted preparation for government and banking exams with expert-curated content
+          </p>
+
+          {/* ===== EXAM CATEGORY CARDS ===== */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { 
+                id: "railway", 
+                title: "Railway Exams", 
+                image: "https://etimg.etb2bimg.com/photo/111281165.cms", 
+                desc: "RRB NTPC, Group D, ALP & Junior Engineer" 
+              },
+              { 
+                id: "ssc", 
+                title: "SSC Exams", 
+                image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80", 
+                desc: "CGL, CHSL, MTS, CPO & Stenographer" 
+              },
+              { 
+                id: "teaching", 
+                title: "Teaching Exams", 
+                image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80", 
+                desc: "CTET, TET, UPTET, REET & DSSSB" 
+              },
+              { 
+                id: "banking", 
+                title: "Banking Exams", 
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDqjCOim8VZp4rNbIAj42viB4zeQuaYwpltw&s", 
+                desc: "IBPS PO, Clerk, SBI PO, RBI & LIC" 
+              },
+            ].map((exam) => (
+              <div
+                key={exam.id}
+                onClick={() => setSelectedCompetitiveExam(exam.id)}
+                className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 active:scale-[0.98]"
+              >
+                {/* Card Background Image */}
+                <div className="h-48 relative overflow-hidden">
+                  <img
+                    src={exam.image}
+                    alt={exam.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+                  
+                  {/* Title Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-white text-2xl font-bold">{exam.title}</h3>
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="p-6 text-center">
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {exam.desc}
+                  </p>
+                </div>
               </div>
-              <h3 className="font-bold text-2xl text-gray-800">{teacher.name}</h3>
-              <p className="text-[#5faae0] font-medium">{teacher.experience}</p>
-              <p className="text-sm text-gray-500 mt-1">
-                {teacher.subjects.map(s => s.name).join(" • ")}
-              </p>
-              <p className="mt-6 text-gray-600 text-sm line-clamp-3">{teacher.bio}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+
+        {/* ====================== COMPETITIVE EXAM SUBJECT MODAL ====================== */}
+        {selectedCompetitiveExam && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+            <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
+              
+              {/* Modal Header */}
+              <div className="p-6 border-b flex items-center justify-between bg-gray-50 rounded-t-3xl">
+                <h3 className="text-2xl font-bold text-gray-800 capitalize">
+                  Subjects for {selectedCompetitiveExam} Exams
+                </h3>
+                <button
+                  onClick={() => setSelectedCompetitiveExam(null)}
+                  className="text-gray-500 hover:text-gray-700 text-3xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Subjects List */}
+              <div className="p-6 space-y-4 overflow-y-auto max-h-[65vh]">
+                {[
+                  { name: "English", desc: "Grammar, Vocabulary & Comprehension" },
+                  { name: "Verbal Reasoning", desc: "Logical & Analytical Reasoning" },
+                  { name: "Non Verbal Reasoning", desc: "Pattern, Series & Figure Analysis" },
+                  { name: "Quantitative Aptitude", desc: "Maths & Data Interpretation" },
+                  { name: "General Awareness", desc: "Current Affairs & GK" },
+                ].map((subject) => (
+                  <div
+                    key={subject.name}
+                    onClick={() => {
+                      const url = `/courses?type=competitive&exam=${selectedCompetitiveExam}&subject=${subject.name.toLowerCase().replace(/\s+/g, '-')}`;
+                      window.open(url, "_blank");
+                    }}
+                    className="flex items-center gap-5 p-6 bg-gray-50 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 rounded-2xl cursor-pointer transition-all group"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold text-xl text-gray-800 group-hover:text-emerald-700 transition-colors">
+                        {subject.name}
+                      </p>
+                      <p className="text-gray-600 text-sm mt-1">{subject.desc}</p>
+                    </div>
+                    <span className="text-3xl text-gray-300 group-hover:text-emerald-600 transition">→</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t bg-gray-50 rounded-b-3xl text-center">
+                <button
+                  onClick={() => setSelectedCompetitiveExam(null)}
+                  className="px-10 py-3 text-gray-600 hover:text-gray-800 font-medium"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
+
+      
 
       {/* ====================== WHY CHOOSE US ====================== */}
       <section className="bg-gray-100 py-16">
@@ -615,28 +864,39 @@ function Home() {
       {/* ====================== ONLINE TUITION CLASSES ====================== */}
       <section className="bg-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4">
+          {/* Header */}
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">{t.onlineTuition}</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">{t.chooseSubject}</p>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+              {t.onlineTuition}
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              {t.chooseSubject}
+            </p>
           </div>
 
+          {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             
             {/* Mathematics Card */}
-            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
+            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl">📐</div>
                   <h3 className="text-2xl font-bold text-gray-900">{t.mathematics}</h3>
                 </div>
+                
                 <div className="flex flex-wrap gap-3 mb-8">
-                  {["Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Competitive Exams"].map((cls) => (
-                    <button key={cls} className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all">
+                  {["Class 8", "Class 9", "Class 10", "Class 11", "Class 12"].map((cls) => (
+                    <button 
+                      key={cls} 
+                      className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all"
+                    >
                       {cls}
                     </button>
                   ))}
                 </div>
+
                 <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.startLearning} {t.mathematics} <span className="text-xl">→</span>
                 </button>
@@ -644,20 +904,25 @@ function Home() {
             </div>
 
             {/* Science Card */}
-            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
+            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl">🧪</div>
                   <h3 className="text-2xl font-bold text-gray-900">{t.science}</h3>
                 </div>
+                
                 <div className="flex flex-wrap gap-3 mb-8">
-                  {["Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Competitive Exams"].map((cls) => (
-                    <button key={cls} className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all">
+                  {["Class 8", "Class 9", "Class 10", "Class 11", "Class 12"].map((cls) => (
+                    <button 
+                      key={cls} 
+                      className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all"
+                    >
                       {cls}
                     </button>
                   ))}
                 </div>
+
                 <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.startLearning} {t.science} <span className="text-xl">→</span>
                 </button>
@@ -665,20 +930,25 @@ function Home() {
             </div>
 
             {/* English Card */}
-            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
+            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-3xl">📖</div>
                   <h3 className="text-2xl font-bold text-gray-900">{t.english}</h3>
                 </div>
+                
                 <div className="flex flex-wrap gap-3 mb-8">
-                  {["Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Competitive Exams"].map((cls) => (
-                    <button key={cls} className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all">
+                  {["Class 8", "Class 9", "Class 10", "Class 11", "Class 12"].map((cls) => (
+                    <button 
+                      key={cls} 
+                      className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all"
+                    >
                       {cls}
                     </button>
                   ))}
                 </div>
+
                 <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.startLearning} {t.english} <span className="text-xl">→</span>
                 </button>
@@ -686,20 +956,25 @@ function Home() {
             </div>
 
             {/* Foreign Languages Card */}
-            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
+            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl">🌍</div>
                   <h3 className="text-2xl font-bold text-gray-900">{t.foreignLanguages}</h3>
                 </div>
+                
                 <div className="flex flex-wrap gap-3 mb-8">
                   {["Beginner", "Intermediate", "Advanced"].map((level) => (
-                    <button key={level} className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all">
+                    <button 
+                      key={level} 
+                      className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all"
+                    >
                       {level}
                     </button>
                   ))}
                 </div>
+
                 <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.exploreCourses} <span className="text-xl">→</span>
                 </button>
@@ -707,26 +982,93 @@ function Home() {
             </div>
 
             {/* Computer Science Card */}
-            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 md:col-span-2 lg:col-span-1">
+            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 lg:col-span-1">
               <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 bg-cyan-100 rounded-2xl flex items-center justify-center text-3xl">💻</div>
                   <h3 className="text-2xl font-bold text-gray-900">{t.computerScience}</h3>
                 </div>
+                
                 <div className="flex flex-wrap gap-3 mb-8">
                   {["Basics", "Programming", "Web Development", "Advanced Topics"].map((topic) => (
-                    <button key={topic} className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all">
+                    <button 
+                      key={topic} 
+                      className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all"
+                    >
                       {topic}
                     </button>
                   ))}
                 </div>
+
                 <button className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
                   {t.startCoding} <span className="text-xl">→</span>
                 </button>
               </div>
             </div>
+
+            {/* Competitive Exams Card - Now properly matched */}
+            <div className="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 lg:col-span-1">
+              <div className="h-2 bg-gradient-to-r from-[#5faae0] to-[#4a9bd4]"></div>
+              <div className="p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-3xl">🏆</div>
+                  <h3 className="text-2xl font-bold text-gray-900">Competitive Exams</h3>
+                </div>
+                
+                <div className="mb-8">
+                  <div className="flex flex-wrap gap-3">
+                    {["Banking", "SSC", "Railway", "Teaching"].map((exam) => (
+                      <button 
+                        key={exam}
+                        onClick={() => window.open(`/courses?type=competitive&exam=${exam.toLowerCase()}`, "_blank")}
+                        className="px-5 py-2.5 text-sm font-medium bg-gray-100 hover:bg-[#5faae0] hover:text-white text-gray-700 rounded-full transition-all"
+                      >
+                        {exam}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2"
+                  onClick={() => window.open(`/courses?type=competitive`, "_blank")}
+                >
+                  Explore All Competitive Exams <span className="text-xl">→</span>
+                </button>
+              </div>
+            </div>
+
           </div>
+        </div>
+      </section>
+
+      {/* ====================== TOP INSTRUCTORS ====================== */}
+      <section id="teachers" className="max-w-6xl mx-auto px-4 py-16 bg-gray-50">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+          {t.meetOurExperts}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {teachers.map((teacher) => (
+            <div 
+              key={teacher._id} 
+              className="bg-white rounded-3xl p-8 text-center hover:shadow-2xl hover:-translate-y-1 transition-all"
+            >
+              <div className="w-32 h-32 mx-auto mb-6 overflow-hidden rounded-full border-4 border-white shadow-lg">
+                <img 
+                  src={teacher.profileImage} 
+                  alt={teacher.name} 
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+              <h3 className="font-bold text-2xl text-gray-800">{teacher.name}</h3>
+              <p className="text-[#5faae0] font-medium">{teacher.experience}</p>
+              <p className="text-sm text-gray-500 mt-1">
+                {teacher.subjects.map(s => s.name).join(" • ")}
+              </p>
+              <p className="mt-6 text-gray-600 text-sm line-clamp-3">{teacher.bio}</p>
+            </div>
+          ))}
         </div>
       </section>
 

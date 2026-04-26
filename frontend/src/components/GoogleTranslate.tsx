@@ -18,13 +18,11 @@ const GoogleTranslate = () => {
   useEffect(() => {
     const scriptId = 'google-translate-script';
 
-    // Prevent loading script multiple times
-    if (document.getElementById(scriptId)) {
-      return;
-    }
+    // Prevent loading the script multiple times
+    if (document.getElementById(scriptId)) return;
 
     window.googleTranslateElementInit = () => {
-      if (window.google?.translate) {
+      if (window.google?.translate?.TranslateElement) {
         new window.google.translate.TranslateElement(
           {
             pageLanguage: 'en',
@@ -39,7 +37,7 @@ const GoogleTranslate = () => {
 
     const script = document.createElement('script');
     script.id = scriptId;
-    script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
     script.async = true;
     document.body.appendChild(script);
 
@@ -49,18 +47,23 @@ const GoogleTranslate = () => {
     };
   }, []);
 
-  // Inject global styles to hide the annoying banner
+  // Hide Google Translate banner and top bar
   useEffect(() => {
+    const styleId = 'google-translate-hide-banner';
+    if (document.getElementById(styleId)) return;
+
     const style = document.createElement('style');
-    style.id = 'google-translate-hide-banner';
+    style.id = styleId;
     style.innerHTML = `
       .goog-te-banner-frame.skiptranslate,
-      .goog-te-banner-frame {
+      .goog-te-banner-frame,
+      .goog-te-gadget-simple .goog-te-gadget-icon,
+      .goog-te-gadget-simple .goog-te-gadget-text {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
       }
-      
+
       body {
         top: 0 !important;
         margin-top: 0 !important;
@@ -77,31 +80,31 @@ const GoogleTranslate = () => {
     document.head.appendChild(style);
 
     return () => {
-      const existingStyle = document.getElementById('google-translate-hide-banner');
+      const existingStyle = document.getElementById(styleId);
       if (existingStyle) existingStyle.remove();
     };
   }, []);
 
   return (
     <>
-      {/* Clean Language Switcher Buttons */}
+      {/* Clean Language Switcher */}
       <div className="flex items-center gap-2">
         <button
           onClick={() => translateTo('en')}
-          className="px-4 py-2 text-sm font-medium rounded-xl border border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition active:scale-95"
+          className="px-4 py-2 text-sm font-medium rounded-xl border border-gray-300 hover:bg-gray-100 hover:border-gray-400 active:bg-gray-200 transition active:scale-95"
         >
-          English
+          🇬🇧 EN
         </button>
         <button
           onClick={() => translateTo('hi')}
-          className="px-4 py-2 text-sm font-medium rounded-xl border border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition active:scale-95"
+          className="px-4 py-2 text-sm font-medium rounded-xl border border-gray-300 hover:bg-gray-100 hover:border-gray-400 active:bg-gray-200 transition active:scale-95"
         >
-          हिंदी
+          🇮🇳 हिंदी
         </button>
       </div>
 
       {/* Hidden container required by Google Translate */}
-      <div id="google_translate_element_hidden" className="hidden"></div>
+      <div id="google_translate_element_hidden" className="hidden" />
     </>
   );
 };

@@ -5,7 +5,7 @@ import Dashboard from "./Dashboard";
 import CoursePage from "./components/CoursePage";
 import BecomeInstructor from './BecomeInstructor'; 
 import Courses from './components/Courses';
-
+import TestPage from './TestPage';
 function App() {
   return (
     <Router>
@@ -14,7 +14,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/course/:id" element={<CoursePage />} />
         <Route path="/become-instructor" element={<BecomeInstructor />} />
-
+        <Route path="/test" element={<TestPage />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="*" element={<Home />} />
       </Routes>
