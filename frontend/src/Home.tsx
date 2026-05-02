@@ -22,7 +22,7 @@ const translations = {
     studentsJoined: "2,340 students joined",
     mediumLevel: "Medium Level",
     left: "left",
-    joinLiveQuiz: "Join Live Quiz →",
+    joinLiveQuiz: "Join Now →",
 
     dailyJobUpdates: "Daily Updates",
     viewAllJobs: "View All Updates",
@@ -73,13 +73,33 @@ const translations = {
 function Home() {
   const navigate = useNavigate();
 
+  // State for Daily Quiz Modal
+  const [showDailyQuizModal, setShowDailyQuizModal] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [score, setScore] = useState(0);
+
+  // For testing - Show modal on every refresh
+  useEffect(() => {
+    // Remove localStorage check for testing
+    const timer = setTimeout(() => {
+      setShowDailyQuizModal(true);
+      // Reset quiz state on open
+      setSelectedAnswer(null);
+      setIsSubmitted(false);
+      setScore(0);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // For class section (new UI)
-const [selectedClassLevel, setSelectedClassLevel] = useState<number | null>(null);
+  const [selectedClassLevel, setSelectedClassLevel] = useState<number | null>(null);
 
-const [selectedCompetitiveExam, setSelectedCompetitiveExam] = useState<string | null>(null);
+  const [selectedCompetitiveExam, setSelectedCompetitiveExam] = useState<string | null>(null);
 
-// For modal (self-study)
-const [modalClass, setModalClass] = useState<string | null>(null);
+  // For modal (self-study)
+  const [modalClass, setModalClass] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
@@ -294,11 +314,30 @@ const [modalClass, setModalClass] = useState<string | null>(null);
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-10 text-base font-medium text-gray-700">
-            <a href="/courses" className="hover:text-[#5faae0] transition-colors">
+            <a 
+              href="#courses"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('courses')?.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'start'
+                });
+              }}
+              className="hover:text-[#5faae0] transition-colors cursor-pointer"
+            >
               {t.navCourses}
             </a>
-            
-            <a href="#" className="hover:text-[#5faae0] transition-colors">
+            <a 
+              href="#categories"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('categories')?.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'start'
+                });
+              }}
+              className="hover:text-[#5faae0] transition-colors cursor-pointer"
+            >
               {t.navCategories}
             </a>
 
@@ -459,8 +498,9 @@ const [modalClass, setModalClass] = useState<string | null>(null);
           </div>
         </div>
       </section>
+
       {/* ====================== LEARNING OPTIONS ====================== */}
-      <section className="max-w-6xl mx-auto px-4 py-16 bg-gray-50">
+      <section id="categories" className="max-w-6xl mx-auto px-4 py-16 bg-gray-50">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
             {t.exploreLearningPaths}
@@ -595,7 +635,7 @@ const [modalClass, setModalClass] = useState<string | null>(null);
       )}
 
       {/* ====================== CLASS BASED LEARNING ====================== */}
-      <section className="bg-white py-16">
+      <section id="courses" className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
             Choose Your Class
@@ -1139,6 +1179,136 @@ const [modalClass, setModalClass] = useState<string | null>(null);
               <div className="text-center text-sm text-gray-500">
                 More login options coming soon...
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====================== DAILY QUIZ MODAL (1 Question) ====================== */}
+      {showDailyQuizModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl max-h-[95vh] 
+                          overflow-y-auto scrollbar-hide">
+            
+            {/* Header */}
+            <div className="bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] p-6 md:p-8 text-white text-center relative">
+              <button
+                onClick={() => setShowDailyQuizModal(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white text-4xl leading-none"
+              >
+                ×
+              </button>
+
+              <div className="mx-auto w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4">
+                <span className="text-5xl">🏆</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold">WIN TODAY'S QUIZ</h2>
+              <p className="text-white/90 mt-1 text-sm md:text-base">1 Question • Daily Challenge</p>
+            </div>
+
+            {/* Rewards Section */}
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b p-5 md:p-6">
+              <p className="text-center text-amber-700 font-semibold mb-3 text-sm uppercase tracking-widest">
+                Today's Rewards
+              </p>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="text-3xl mb-1">🪙</div>
+                  <p className="font-bold text-lg text-amber-600">50 Coins</p>
+                  <p className="text-xs text-gray-500">LearningHub Coins</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="text-3xl mb-1">🏅</div>
+                  <p className="font-bold text-lg text-amber-600">Badge</p>
+                  <p className="text-xs text-gray-500">Daily Winner Badge</p>
+                </div>
+              </div>
+              <p className="text-center text-xs text-amber-600 mt-4">
+                Top 10 scorers also get <span className="font-semibold">Certificate</span>
+              </p>
+            </div>
+
+            {/* Question Area */}
+            <div className="p-6 md:p-8">
+              <div className="mb-6">
+                <p className="text-xs md:text-sm uppercase tracking-widest text-gray-500 mb-2">GENERAL KNOWLEDGE</p>
+                <h3 className="text-lg md:text-xl font-semibold text-gray-800 leading-relaxed">
+                  Who was the first President of India?
+                </h3>
+              </div>
+
+              {/* Options */}
+              <div className="space-y-3">
+                {[
+                  { id: "A", text: "Jawaharlal Nehru" },
+                  { id: "B", text: "Dr. Rajendra Prasad" },
+                  { id: "C", text: "Sardar Vallabhbhai Patel" },
+                  { id: "D", text: "B.R. Ambedkar" }
+                ].map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => !isSubmitted && setSelectedAnswer(option.id)}
+                    className={`w-full text-left p-4 md:p-5 rounded-2xl border-2 text-base transition-all ${
+                      selectedAnswer === option.id 
+                        ? 'border-[#5faae0] bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    } ${isSubmitted ? 'cursor-default' : 'cursor-pointer'}`}
+                  >
+                    <span className="font-bold mr-3 text-[#5faae0]">{option.id}.</span>
+                    {option.text}
+                  </button>
+                ))}
+              </div>
+
+              {/* Result */}
+              {isSubmitted && (
+                <div className="mt-8 p-5 rounded-2xl bg-green-50 border border-green-200 text-center">
+                  <p className="text-3xl mb-2">
+                    {score === 1 ? "🎉" : "😔"}
+                  </p>
+                  <p className="text-xl font-bold text-green-600 mb-1">
+                    {score === 1 ? "Correct Answer!" : "Better luck next time"}
+                  </p>
+                  <p className="text-gray-600">
+                    {score === 1 
+                      ? "You earned 50 LearningHub Coins + Daily Winner Badge!" 
+                      : "The correct answer is B. Dr. Rajendra Prasad."}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="border-t p-5 md:p-6 flex flex-col gap-3">
+              {!isSubmitted ? (
+                <button
+                  onClick={() => {
+                    if (!selectedAnswer) {
+                      alert("Please select an answer!");
+                      return;
+                    }
+                    setIsSubmitted(true);
+                    setScore(selectedAnswer === "B" ? 1 : 0);
+                  }}
+                  className="w-full bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] hover:brightness-105 text-white font-semibold py-4 rounded-2xl text-lg transition active:scale-[0.98]"
+                >
+                  Submit Answer
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowDailyQuizModal(false)}
+                  className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl text-lg transition"
+                >
+                  Close & Continue
+                </button>
+              )}
+
+              <button
+                onClick={() => setShowDailyQuizModal(false)}
+                className="text-gray-500 hover:text-gray-700 py-2 text-sm font-medium"
+              >
+                Skip for today
+              </button>
             </div>
           </div>
         </div>
