@@ -1,19 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  FileText, 
-  CheckCircle, 
-  ChevronDown, 
-  ChevronUp, 
   Play, 
-  Award, 
-  BookOpen, 
-  Edit3 
+  ChevronDown, 
+  ChevronUp 
 } from 'lucide-react';
 
 const CoursePage = () => {
+  const navigate = useNavigate();
+
   const [activeChapter, setActiveChapter] = useState<number | null>(null);
-  const [activeLesson, setActiveLesson] = useState<number | null>(null);
-  const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const [activeTopic, setActiveTopic] = useState<number | null>(null);
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string>(
     "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4"
   );
@@ -22,388 +19,310 @@ const CoursePage = () => {
   const [notes, setNotes] = useState<string>("");
 
   const course = {
-    title: "Mathematics Foundation for Class 10",
-    description: "Master all important concepts of Class 10 Mathematics with easy explanations, solved examples, and practice tests. Completely Free!",
-    instructor: "Mr. Rajesh Sharma",
-    duration: "45+ hours",
-    level: "Class 10",
+    title: "Maths for Class 5",
+    description: "Learn Mathematics in a simple and easy way.",
+    instructor: "Teacher Priya",
+    duration: "30+ hours",
+    level: "Class 5",
     language: "Hindi & English",
   };
 
   const chapters = [
     {
-      id: 1,
-      title: "Chapter 1: Real Numbers",
-      duration: "6 hours",
-      lessons: [
+      id: 0,
+      title: "Introduction",
+      isIntro: true,
+      topics: [
         {
-          id: 101,
-          title: "Introduction to Real Numbers",
-          duration: "28 min",
+          id: 1,
+          title: "Welcome to Class 5 Maths",
+          duration: "15 min",
           videos: [
             { 
-              id: 1011, 
-              title: "What are Real Numbers?", 
-              duration: "12 min", 
-              videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" 
-            },
-            { 
-              id: 1012, 
-              title: "Types of Real Numbers", 
-              duration: "16 min", 
+              id: 11, 
+              title: "Course Introduction", 
+              duration: "15 min", 
               videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" 
-            },
-          ],
-          pdfNotes: "intro-real-numbers.pdf",
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 1,
+      title: "Chapter 1 – Number System",
+      topics: [
+        {
+          id: 101,
+          title: "Natural Numbers",
+          duration: "45 min",
+          videos: [
+            { id: 1011, title: "Natural Numbers - Part 1", duration: "22 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" },
+            { id: 1012, title: "Natural Numbers - Part 2", duration: "23 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" }
+          ]
         },
         {
           id: 102,
-          title: "Euclid's Division Lemma",
-          duration: "35 min",
+          title: "Whole Numbers",
+          duration: "50 min",
           videos: [
-            { 
-              id: 1021, 
-              title: "Understanding Euclid's Lemma", 
-              duration: "20 min", 
-              videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" 
-            },
-            { 
-              id: 1022, 
-              title: "Examples & Proof", 
-              duration: "15 min", 
-              videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" 
-            },
-          ],
-          pdfNotes: "euclid-division.pdf",
+            { id: 1021, title: "Whole Numbers - Part 1", duration: "25 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" },
+            { id: 1022, title: "Whole Numbers - Part 2", duration: "25 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" }
+          ]
         },
-      ],
+        {
+          id: 103,
+          title: "Integers",
+          duration: "55 min",
+          videos: [
+            { id: 1031, title: "Integers - Part 1", duration: "28 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" },
+            { id: 1032, title: "Integers - Part 2", duration: "27 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" }
+          ]
+        }
+      ]
     },
     {
       id: 2,
-      title: "Chapter 2: Polynomials",
-      duration: "8 hours",
-      lessons: [
+      title: "Chapter 2 – Probability and Statistics",
+      topics: [
         {
           id: 201,
-          title: "Introduction to Polynomials",
-          duration: "25 min",
+          title: "Probability",
+          duration: "40 min",
           videos: [
-            { 
-              id: 2011, 
-              title: "What is a Polynomial?", 
-              duration: "10 min", 
-              videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" 
-            },
-            { 
-              id: 2012, 
-              title: "Degree & Types", 
-              duration: "15 min", 
-              videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" 
-            },
-          ],
-          pdfNotes: "intro-polynomials.pdf",
+            { id: 2011, title: "Probability - Part 1", duration: "20 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" },
+            { id: 2012, title: "Probability - Part 2", duration: "20 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" }
+          ]
         },
-      ],
-    },
+        {
+          id: 202,
+          title: "Venn Diagrams",
+          duration: "35 min",
+          videos: [
+            { id: 2021, title: "Venn Diagrams - Part 1", duration: "18 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" },
+            { id: 2022, title: "Venn Diagrams - Part 2", duration: "17 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" }
+          ]
+        },
+        {
+          id: 203,
+          title: "Statistics",
+          duration: "45 min",
+          videos: [
+            { id: 2031, title: "Statistics - Part 1", duration: "22 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1775194267/lesson1_qytuxy.mp4" },
+            { id: 2032, title: "Statistics - Part 2", duration: "23 min", videoUrl: "https://res.cloudinary.com/dvlbqsfyu/video/upload/v1772246923/8948765-hd_1920_1080_25fps_rjrswg.mp4" }
+          ]
+        }
+      ]
+    }
   ];
-
-  // Demo Transcript (You can later make this dynamic per video)
-  const currentTranscript = `In this lesson, we will understand the concept of Real Numbers. Real numbers include both rational and irrational numbers. Rational numbers can be expressed in the form of p/q where q ≠ 0. This chapter forms the foundation for all higher mathematics.`;
 
   const playVideo = (videoUrl: string) => {
     setCurrentVideoUrl(videoUrl);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const markLessonComplete = (lessonId: number) => {
-    if (!completedLessons.includes(lessonId)) {
-      setCompletedLessons([...completedLessons, lessonId]);
-    }
-  };
-
-  const openTestInNewTab = (type: 'lesson' | 'chapter' | 'course', id?: number) => {
-    const testUrl = `/test?type=${type}&courseId=${encodeURIComponent(course.title)}${id ? `&id=${id}` : ''}`;
-    window.open(testUrl, '_blank');
+  const openTest = (testType: string, id?: number) => {
+    navigate('/test', { 
+      state: { 
+        testType,
+        courseTitle: course.title,
+        id 
+      } 
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 md:py-5">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
+      <div className="bg-white border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-5">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
             {course.title}
           </h1>
-          <span className="inline-block mt-2 bg-green-100 text-green-700 px-4 py-1 rounded-full text-xs md:text-sm font-medium">
-            FREE COURSE
-          </span>
+          <p className="text-gray-600 mt-1">Easy Maths for Class 5</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 pt-6 lg:pt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          
-          {/* ====================== LEFT SIDE - VIDEO + TABS ====================== */}
-          <div className="lg:col-span-8 space-y-6 lg:space-y-8">
-            
+      <div className="max-w-7xl mx-auto px-4 pt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+          {/* ===================== LEFT SIDE ===================== */}
+          <div className="lg:col-span-8 space-y-8">
+
             {/* Video Player */}
-            <div className="bg-black rounded-2xl md:rounded-3xl overflow-hidden shadow-xl aspect-video">
-              <video
+            <div className="bg-black rounded-2xl overflow-hidden shadow">
+              <video 
                 key={currentVideoUrl}
-                controls
-                autoPlay
-                className="w-full h-full"
+                controls 
+                autoPlay 
+                className="w-full aspect-video"
               >
                 <source src={currentVideoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
 
-            {/* Tabs Section */}
-            <div className="bg-white rounded-2xl md:rounded-3xl shadow-sm overflow-hidden">
-              
-              {/* Tab Navigation */}
-              <div className="flex border-b overflow-x-auto hide-scrollbar bg-white">
+            {/* Tabs */}
+            <div className="bg-white rounded-2xl shadow-sm border">
+              <div className="flex border-b">
                 <button
                   onClick={() => setActiveTab('about')}
-                  className={`flex-1 min-w-[100px] py-4 px-4 font-medium flex items-center justify-center gap-2 transition-all text-sm md:text-base whitespace-nowrap
-                    ${activeTab === 'about' 
-                      ? 'text-[#5faae0] border-b-4 border-[#5faae0]' 
-                      : 'text-gray-600 hover:text-gray-800'}`}
+                  className={`flex-1 py-4 text-base font-medium ${activeTab === 'about' ? 'text-blue-600 border-b-4 border-blue-600' : 'text-gray-600'}`}
                 >
-                  <BookOpen className="w-5 h-5" />
                   About Course
                 </button>
-
                 <button
                   onClick={() => setActiveTab('transcript')}
-                  className={`flex-1 min-w-[100px] py-4 px-4 font-medium flex items-center justify-center gap-2 transition-all text-sm md:text-base whitespace-nowrap
-                    ${activeTab === 'transcript' 
-                      ? 'text-[#5faae0] border-b-4 border-[#5faae0]' 
-                      : 'text-gray-600 hover:text-gray-800'}`}
+                  className={`flex-1 py-4 text-base font-medium ${activeTab === 'transcript' ? 'text-blue-600 border-b-4 border-blue-600' : 'text-gray-600'}`}
                 >
-                  <Play className="w-5 h-5" />
                   Transcript
                 </button>
-
                 <button
                   onClick={() => setActiveTab('notes')}
-                  className={`flex-1 min-w-[100px] py-4 px-4 font-medium flex items-center justify-center gap-2 transition-all text-sm md:text-base whitespace-nowrap
-                    ${activeTab === 'notes' 
-                      ? 'text-[#5faae0] border-b-4 border-[#5faae0]' 
-                      : 'text-gray-600 hover:text-gray-800'}`}
+                  className={`flex-1 py-4 text-base font-medium ${activeTab === 'notes' ? 'text-blue-600 border-b-4 border-blue-600' : 'text-gray-600'}`}
                 >
-                  <Edit3 className="w-5 h-5" />
-                  Take Notes
+                  My Notes
                 </button>
               </div>
 
-              {/* Tab Content */}
-              <div className="p-5 md:p-8 min-h-[280px]">
+              <div className="p-6 md:p-8">
                 {activeTab === 'about' && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-semibold text-gray-900">About This Course</h2>
-                    <p className="text-gray-700 leading-relaxed text-[17px]">
+                  <div className="space-y-6 text-[17px]">
+                    <p className="text-gray-700 leading-relaxed">
                       {course.description}
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 text-sm">
+                    <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <span className="text-gray-500 block">Instructor</span>
-                        <p className="font-medium text-gray-800">{course.instructor}</p>
+                        <span className="text-gray-500 text-sm">Teacher</span>
+                        <p className="font-medium">{course.instructor}</p>
                       </div>
                       <div>
-                        <span className="text-gray-500 block">Duration</span>
-                        <p className="font-medium text-gray-800">{course.duration}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500 block">Level</span>
-                        <p className="font-medium text-gray-800">{course.level}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500 block">Language</span>
-                        <p className="font-medium text-gray-800">{course.language}</p>
+                        <span className="text-gray-500 text-sm">Duration</span>
+                        <p className="font-medium">{course.duration}</p>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'transcript' && (
-                  <div>
-                    <h2 className="text-2xl font-semibold mb-4 flex items-center gap-3">
-                      <Play className="w-6 h-6 text-[#5faae0]" />
-                      Video Transcript
-                    </h2>
-                    <div className="bg-gray-50 p-6 rounded-2xl text-gray-700 leading-relaxed border">
-                      {currentTranscript}
-                      <p className="text-xs text-gray-500 mt-8 italic">
-                        * Transcript is auto-generated and may have minor inaccuracies.
-                      </p>
-                    </div>
+                  <div className="bg-gray-50 p-6 rounded-xl text-gray-700 leading-relaxed">
+                    This is the transcript of the current video. You can read it while watching.
                   </div>
                 )}
 
                 {activeTab === 'notes' && (
                   <div>
-                    <h2 className="text-2xl font-semibold mb-4 flex items-center gap-3">
-                      <Edit3 className="w-6 h-6 text-[#5faae0]" />
-                      My Notes
-                    </h2>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Write your personal notes here... Important formulas, doubts, key points, etc."
-                      className="w-full h-64 p-5 border border-gray-300 rounded-2xl focus:outline-none focus:border-[#5faae0] resize-y min-h-[220px] text-gray-700"
+                      placeholder="Write important points here..."
+                      className="w-full h-64 p-5 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 text-base"
                     />
-                    <div className="flex justify-end mt-4">
-                      <button
-                        onClick={() => alert("✅ Notes saved successfully!")}
-                        className="px-8 py-3 bg-[#5faae0] hover:bg-[#4a9bd4] text-white rounded-2xl font-medium transition"
-                      >
-                        Save Notes
-                      </button>
-                    </div>
+                    <button 
+                      onClick={() => alert("Notes Saved Successfully!")}
+                      className="mt-4 px-8 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700"
+                    >
+                      Save Notes
+                    </button>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* ====================== RIGHT SIDE - COURSE CURRICULUM ====================== */}
+          {/* ===================== RIGHT SIDE - COURSE CONTENT ===================== */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-2xl md:rounded-3xl shadow-sm border sticky top-20 lg:top-24 overflow-hidden">
-              <div className="p-5 md:p-6 border-b bg-gray-50">
-                <h2 className="text-xl font-semibold text-gray-900">Course Curriculum</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  {chapters.length} Chapters • {chapters.reduce((acc, ch) => acc + ch.lessons.length, 0)} Lessons
-                </p>
+            <div className="bg-white rounded-2xl shadow-sm border sticky top-6">
+              <div className="p-6 border-b">
+                <h2 className="text-xl font-semibold text-gray-800">Course Content</h2>
               </div>
 
-              <div className="divide-y max-h-[70vh] lg:max-h-none overflow-y-auto">
-                {chapters.map((chapter, chapterIndex) => (
+              <div className="divide-y">
+                {chapters.map((chapter) => (
                   <div key={chapter.id}>
                     {/* Chapter Header */}
                     <div
-                      onClick={() => {
-                        setActiveChapter(activeChapter === chapterIndex ? null : chapterIndex);
-                        setActiveLesson(null);
-                      }}
-                      className="p-5 md:p-6 flex items-center justify-between cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-all"
+                      onClick={() => setActiveChapter(activeChapter === chapter.id ? null : chapter.id)}
+                      className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50"
                     >
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-base md:text-lg text-gray-800">{chapter.title}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{chapter.duration}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); openTestInNewTab('chapter', chapter.id); }}
-                          className="text-xs px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-xl transition"
-                        >
-                          Chapter Test
-                        </button>
-                        {activeChapter === chapterIndex ? 
-                          <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-                          <ChevronDown className="w-5 h-5 text-gray-400" />
-                        }
-                      </div>
+                      <h3 className="font-semibold text-lg text-gray-800">{chapter.title}</h3>
+                      {activeChapter === chapter.id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </div>
 
-                    {/* Lessons */}
-                    {activeChapter === chapterIndex && (
-                      <div className="px-4 md:px-6 pb-6 bg-gray-50 space-y-4">
-                        {chapter.lessons.map((lesson) => {
-                          const isLessonOpen = activeLesson === lesson.id;
-
-                          return (
-                            <div key={lesson.id} className="bg-white rounded-2xl border overflow-hidden">
-                              <div
-                                onClick={() => setActiveLesson(isLessonOpen ? null : lesson.id)}
-                                className="p-4 md:p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50"
-                              >
-                                <div className="flex items-center gap-3 flex-1">
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all
-                                    ${completedLessons.includes(lesson.id) ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>
-                                    {completedLessons.includes(lesson.id) ? 
-                                      <CheckCircle className="w-5 h-5 text-white" /> : 
-                                      <Play className="w-5 h-5 text-gray-400" />
-                                    }
-                                  </div>
-                                  <div className="flex-1">
-                                    <p className="font-medium text-gray-800 text-sm md:text-base">{lesson.title}</p>
-                                    <p className="text-xs text-gray-500">{lesson.duration}</p>
-                                  </div>
-                                </div>
-                                {isLessonOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                    {/* Topics Section */}
+                    {activeChapter === chapter.id && (
+                      <div className="px-5 pb-6 bg-gray-50 space-y-4">
+                        {chapter.topics.map((topic) => (
+                          <div key={topic.id} className="bg-white border rounded-xl">
+                            <div
+                              onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
+                              className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 rounded-xl"
+                            >
+                              <div>
+                                <p className="font-medium text-gray-800">{topic.title}</p>
+                                <p className="text-sm text-gray-500">{topic.duration}</p>
                               </div>
-
-                              {isLessonOpen && (
-                                <div className="px-4 md:px-5 pb-5 space-y-3">
-                                  {lesson.videos.map((video) => (
-                                    <div
-                                      key={video.id}
-                                      onClick={() => playVideo(video.videoUrl)}
-                                      className="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-xl cursor-pointer group active:scale-[0.98] transition"
-                                    >
-                                      <Play className="w-5 h-5 text-[#5faae0] group-hover:scale-110 transition" />
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-700 group-hover:text-[#5faae0]">
-                                          {video.title}
-                                        </p>
-                                        <p className="text-xs text-gray-500">{video.duration}</p>
-                                      </div>
-                                    </div>
-                                  ))}
-
-                                  <div className="flex flex-wrap gap-3 pt-4 border-t">
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); markLessonComplete(lesson.id); }}
-                                      className="flex-1 py-3 text-sm border border-gray-300 hover:bg-gray-100 rounded-2xl transition"
-                                    >
-                                      Mark as Done
-                                    </button>
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); openTestInNewTab('lesson', lesson.id); }}
-                                      className="flex-1 py-3 text-sm bg-[#5faae0] hover:bg-[#4a9bd4] text-white rounded-2xl transition"
-                                    >
-                                      Lesson Test
-                                    </button>
-                                    <a
-                                      href={`/notes/${lesson.pdfNotes}`}
-                                      target="_blank"
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="px-4 py-3 border border-gray-300 hover:bg-gray-100 rounded-2xl flex items-center"
-                                    >
-                                      <FileText className="w-5 h-5" />
-                                    </a>
-                                  </div>
-                                </div>
-                              )}
+                              {activeTopic === topic.id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                             </div>
-                          );
-                        })}
 
-                        <button
-                          onClick={() => openTestInNewTab('chapter', chapter.id)}
-                          className="w-full mt-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-medium transition"
-                        >
-                          Take Full Chapter Test
-                        </button>
+                            {activeTopic === topic.id && (
+                              <div className="px-4 pb-5 space-y-3">
+                                {topic.videos.map((video) => (
+                                  <div
+                                    key={video.id}
+                                    onClick={() => playVideo(video.videoUrl)}
+                                    className="flex items-center gap-3 p-4 hover:bg-gray-100 rounded-xl cursor-pointer"
+                                  >
+                                    <Play className="w-5 h-5 text-blue-600" />
+                                    <div className="flex-1">
+                                      <p className="text-gray-700">{video.title}</p>
+                                      <p className="text-sm text-gray-500">{video.duration}</p>
+                                    </div>
+                                  </div>
+                                ))}
+
+                                {/* Test Button - Hidden for Introduction */}
+                                {!chapter.isIntro && (
+                                  <button
+                                    onClick={() => openTest(`${topic.title} Test`, topic.id)}
+                                    className="w-full py-3 border border-gray-300 hover:bg-gray-100 rounded-xl text-sm font-medium mt-2"
+                                  >
+                                    Take Test
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+
+                        {/* End of Chapter Test - Hidden for Introduction */}
+                        {!chapter.isIntro && (
+                          <button
+                            onClick={() => openTest(`End of ${chapter.title}`, chapter.id)}
+                            className="w-full py-4 bg-gray-800 text-white rounded-2xl font-medium mt-6 hover:bg-black"
+                          >
+                            End of Chapter Test
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
                 ))}
 
-                {/* Final Course Test */}
-                <div className="p-6 bg-gradient-to-r from-emerald-50 to-blue-50">
+                {/* Full Syllabus Tests */}
+                <div className="p-6 space-y-4 bg-gray-50">
                   <button
-                    onClick={() => openTestInNewTab('course')}
-                    className="w-full py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition"
+                    onClick={() => openTest("Full Syllabus Test 1")}
+                    className="w-full py-4 bg-gray-800 text-white rounded-2xl font-medium hover:bg-black"
                   >
-                    <Award className="w-6 h-6" />
-                    Take Final Course Test
+                    Test 1 - Full Syllabus
                   </button>
-                  <p className="text-center text-xs text-gray-500 mt-3">
-                    Complete all chapters to unlock certification
-                  </p>
+                  <button
+                    onClick={() => openTest("Full Syllabus Test 2")}
+                    className="w-full py-4 bg-gray-800 text-white rounded-2xl font-medium hover:bg-black"
+                  >
+                    Test 2 - Full Syllabus
+                  </button>
                 </div>
               </div>
             </div>

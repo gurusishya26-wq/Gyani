@@ -1184,61 +1184,40 @@ function Home() {
         </div>
       )}
 
-      {/* ====================== DAILY QUIZ MODAL (1 Question) ====================== */}
+      {/* ====================== DAILY QUIZ MODAL - KID FRIENDLY ====================== */}
       {showDailyQuizModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl max-h-[95vh] 
-                          overflow-y-auto scrollbar-hide">
-            
-            {/* Header */}
-            <div className="bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] p-6 md:p-8 text-white text-center relative">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl max-h-[95vh] overflow-y-auto">
+
+            {/* Fun Header */}
+            <div className="bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] p-8 text-white text-center relative">
               <button
                 onClick={() => setShowDailyQuizModal(false)}
-                className="absolute top-4 right-4 text-white/80 hover:text-white text-4xl leading-none"
+                className="absolute top-4 right-4 text-white text-5xl leading-none hover:scale-110 transition"
               >
                 ×
               </button>
 
-              <div className="mx-auto w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4">
-                <span className="text-5xl">🏆</span>
+              <div className="mx-auto w-20 h-20 bg-white/30 backdrop-blur-md rounded-3xl flex items-center justify-center mb-4 text-6xl">
+                🏆
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold">WIN TODAY'S QUIZ</h2>
-              <p className="text-white/90 mt-1 text-sm md:text-base">1 Question • Daily Challenge</p>
-            </div>
-
-            {/* Rewards Section */}
-            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b p-5 md:p-6">
-              <p className="text-center text-amber-700 font-semibold mb-3 text-sm uppercase tracking-widest">
-                Today's Rewards
-              </p>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="text-3xl mb-1">🪙</div>
-                  <p className="font-bold text-lg text-amber-600">50 Coins</p>
-                  <p className="text-xs text-gray-500">LearningHub Coins</p>
-                </div>
-                <div className="bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="text-3xl mb-1">🏅</div>
-                  <p className="font-bold text-lg text-amber-600">Badge</p>
-                  <p className="text-xs text-gray-500">Daily Winner Badge</p>
-                </div>
-              </div>
-              <p className="text-center text-xs text-amber-600 mt-4">
-                Top 10 scorers also get <span className="font-semibold">Certificate</span>
-              </p>
+              <h2 className="text-3xl font-bold">Daily Quiz Time! 🎉</h2>
+              <p className="text-white/90 mt-2 text-lg">1 Easy Question</p>
             </div>
 
             {/* Question Area */}
-            <div className="p-6 md:p-8">
-              <div className="mb-6">
-                <p className="text-xs md:text-sm uppercase tracking-widest text-gray-500 mb-2">GENERAL KNOWLEDGE</p>
-                <h3 className="text-lg md:text-xl font-semibold text-gray-800 leading-relaxed">
-                  Who was the first President of India?
+            <div className="p-8">
+              <div className="mb-8 text-center">
+                <div className="inline-block bg-blue-100 text-blue-700 text-sm font-bold px-4 py-1 rounded-full mb-3">
+                  GENERAL KNOWLEDGE
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 leading-relaxed">
+                  Who was the first President of India? 🇮🇳
                 </h3>
               </div>
 
-              {/* Options */}
-              <div className="space-y-3">
+              {/* Simple Options */}
+              <div className="space-y-4">
                 {[
                   { id: "A", text: "Jawaharlal Nehru" },
                   { id: "B", text: "Dr. Rajendra Prasad" },
@@ -1248,13 +1227,15 @@ function Home() {
                   <button
                     key={option.id}
                     onClick={() => !isSubmitted && setSelectedAnswer(option.id)}
-                    className={`w-full text-left p-4 md:p-5 rounded-2xl border-2 text-base transition-all ${
+                    className={`w-full text-left p-5 rounded-2xl border-2 text-lg transition-all font-medium ${
                       selectedAnswer === option.id 
-                        ? 'border-[#5faae0] bg-blue-50' 
+                        ? 'border-[#5faae0] bg-blue-50 shadow-md' 
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     } ${isSubmitted ? 'cursor-default' : 'cursor-pointer'}`}
                   >
-                    <span className="font-bold mr-3 text-[#5faae0]">{option.id}.</span>
+                    <span className="inline-block w-8 h-8 bg-[#5faae0] text-white rounded-xl text-center leading-8 mr-4 font-bold">
+                      {option.id}
+                    </span>
                     {option.text}
                   </button>
                 ))}
@@ -1262,50 +1243,57 @@ function Home() {
 
               {/* Result */}
               {isSubmitted && (
-                <div className="mt-8 p-5 rounded-2xl bg-green-50 border border-green-200 text-center">
-                  <p className="text-3xl mb-2">
-                    {score === 1 ? "🎉" : "😔"}
-                  </p>
-                  <p className="text-xl font-bold text-green-600 mb-1">
-                    {score === 1 ? "Correct Answer!" : "Better luck next time"}
-                  </p>
-                  <p className="text-gray-600">
-                    {score === 1 
-                      ? "You earned 50 LearningHub Coins + Daily Winner Badge!" 
-                      : "The correct answer is B. Dr. Rajendra Prasad."}
-                  </p>
+                <div className="mt-10 p-6 rounded-3xl text-center">
+                  {score === 1 ? (
+                    <div className="bg-green-100 border border-green-300 rounded-3xl p-8">
+                      <p className="text-6xl mb-4">🎉🥳🎉</p>
+                      <p className="text-3xl font-bold text-green-600">Yay! You got it right!</p>
+                      <p className="text-xl mt-3 text-gray-700">
+                        Great Job! You earned 50 Coins + Daily Badge!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-orange-100 border border-orange-200 rounded-3xl p-8">
+                      <p className="text-5xl mb-4">😊</p>
+                      <p className="text-2xl font-bold text-orange-600">Don't worry!</p>
+                      <p className="mt-4 text-gray-700 text-lg">
+                        The correct answer is <span className="font-bold">B. Dr. Rajendra Prasad</span>
+                      </p>
+                      <p className="text-sm text-gray-500 mt-3">Better luck next time champion! 💪</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Footer Buttons */}
-            <div className="border-t p-5 md:p-6 flex flex-col gap-3">
+            <div className="border-t p-6 flex flex-col gap-3">
               {!isSubmitted ? (
                 <button
                   onClick={() => {
                     if (!selectedAnswer) {
-                      alert("Please select an answer!");
+                      alert("Please choose one answer! 😊");
                       return;
                     }
                     setIsSubmitted(true);
                     setScore(selectedAnswer === "B" ? 1 : 0);
                   }}
-                  className="w-full bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] hover:brightness-105 text-white font-semibold py-4 rounded-2xl text-lg transition active:scale-[0.98]"
+                  className="w-full bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] hover:brightness-110 text-white font-bold py-5 rounded-2xl text-xl transition active:scale-95"
                 >
-                  Submit Answer
+                  Submit My Answer
                 </button>
               ) : (
                 <button
                   onClick={() => setShowDailyQuizModal(false)}
-                  className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl text-lg transition"
+                  className="w-full bg-gray-900 hover:bg-black text-white font-bold py-5 rounded-2xl text-xl transition"
                 >
-                  Close & Continue
+                  Close & Continue Learning
                 </button>
               )}
 
               <button
                 onClick={() => setShowDailyQuizModal(false)}
-                className="text-gray-500 hover:text-gray-700 py-2 text-sm font-medium"
+                className="text-gray-500 hover:text-gray-700 py-3 text-base font-medium"
               >
                 Skip for today
               </button>
