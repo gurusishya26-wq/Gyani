@@ -1187,10 +1187,10 @@ function Home() {
       {/* ====================== DAILY QUIZ MODAL - KID FRIENDLY ====================== */}
       {showDailyQuizModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl max-h-[95vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl max-h-[95vh] flex flex-col">
 
-            {/* Fun Header */}
-            <div className="bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] p-8 text-white text-center relative">
+            {/* Fun Header - Fixed */}
+            <div className="bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] p-8 text-white text-center relative flex-shrink-0">
               <button
                 onClick={() => setShowDailyQuizModal(false)}
                 className="absolute top-4 right-4 text-white text-5xl leading-none hover:scale-110 transition"
@@ -1205,8 +1205,8 @@ function Home() {
               <p className="text-white/90 mt-2 text-lg">1 Easy Question</p>
             </div>
 
-            {/* Question Area */}
-            <div className="p-8">
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
               <div className="mb-8 text-center">
                 <div className="inline-block bg-blue-100 text-blue-700 text-sm font-bold px-4 py-1 rounded-full mb-3">
                   GENERAL KNOWLEDGE
@@ -1266,8 +1266,8 @@ function Home() {
               )}
             </div>
 
-            {/* Footer Buttons */}
-            <div className="border-t p-6 flex flex-col gap-3">
+            {/* Footer Buttons - Fixed */}
+            <div className="border-t p-6 flex flex-col gap-3 flex-shrink-0">
               {!isSubmitted ? (
                 <button
                   onClick={() => {
