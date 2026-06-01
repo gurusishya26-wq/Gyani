@@ -1,11 +1,14 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './Home';
-import Dashboard from "./Dashboard";
-import CoursePage from "./components/CoursePage";
-import BecomeInstructor from './BecomeInstructor'; 
-import Courses from './components/Courses';
-import TestPage from './TestPage';
+
+import Home from './Home.js';
+import Dashboard from './Dashboard.js';
+import CoursePage from './components/CoursePage.js';
+import BecomeInstructor from './BecomeInstructor.js';
+import Courses from './components/Courses.js';
+import TestPage from './TestPage.js';
+import AdminPanel from "./AdminPanel.js";
+
 function App() {
   return (
     <Router>
@@ -17,6 +20,10 @@ function App() {
         <Route path="/test" element={<TestPage />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="*" element={<Home />} />
+        <Route
+          path="/admin"
+          element={<AdminPanel />}
+        />
       </Routes>
     </Router>
   );
