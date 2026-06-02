@@ -78,7 +78,7 @@ export default function AdminPanel() {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/classes");
+      const res = await axios.get("https://gyani-vxc9.onrender.com/api/classes");
       setClasses(res.data);
     } catch (error) {
       console.error(error);
@@ -87,7 +87,7 @@ export default function AdminPanel() {
 
   const fetchCompetitiveExams = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/competitive-exams");
+      const res = await axios.get("https://gyani-vxc9.onrender.com/api/competitive-exams");
       setCompetitiveExams(res.data);
     } catch (error) {
       console.error(error);
@@ -96,7 +96,7 @@ export default function AdminPanel() {
 
   const fetchQuizzes = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/daily-quizzes");
+      const res = await axios.get("https://gyani-vxc9.onrender.com/api/daily-quizzes");
       setQuizzes(res.data);
     } catch (error) {
       console.error(error);
@@ -129,10 +129,10 @@ export default function AdminPanel() {
       if (image) formData.append("image", image);
 
       if (editId) {
-        await axios.put(`http://localhost:5000/api/classes/${editId}`, formData);
+        await axios.put(`https://gyani-vxc9.onrender.com/api/classes/${editId}`, formData);
         alert("✅ Class updated successfully");
       } else {
-        await axios.post("http://localhost:5000/api/classes/create", formData);
+        await axios.post("https://gyani-vxc9.onrender.com/api/classes/create", formData);
         alert("✅ Class added successfully");
       }
       resetClassForm();
@@ -161,7 +161,7 @@ export default function AdminPanel() {
   const deleteClass = async (id: string) => {
     if (!window.confirm("Delete this class?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/classes/${id}`);
+      await axios.delete(`https://gyani-vxc9.onrender.com/api/classes/${id}`);
       fetchClasses();
     } catch (error) {
       console.error(error);
@@ -185,10 +185,10 @@ export default function AdminPanel() {
       formData.append("subjects", JSON.stringify(examSubjects));
 
       if (editExamId) {
-        await axios.put(`http://localhost:5000/api/competitive-exams/${editExamId}`, formData);
+        await axios.put(`https://gyani-vxc9.onrender.com/api/competitive-exams/${editExamId}`, formData);
         alert("✅ Exam updated successfully");
       } else {
-        await axios.post("http://localhost:5000/api/competitive-exams/create", formData);
+        await axios.post("https://gyani-vxc9.onrender.com/api/competitive-exams/create", formData);
         alert("✅ Exam added successfully");
       }
       resetExamForm();
@@ -216,7 +216,7 @@ export default function AdminPanel() {
   const deleteExam = async (id: string) => {
     if (!window.confirm("Delete this exam?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/competitive-exams/${id}`);
+      await axios.delete(`https://gyani-vxc9.onrender.com/api/competitive-exams/${id}`);
       fetchCompetitiveExams();
     } catch (error) {
       console.error(error);
@@ -260,12 +260,12 @@ export default function AdminPanel() {
       if (optionImageD) formData.append("optionImageD", optionImageD);
 
       if (editQuizId) {
-        await axios.put(`http://localhost:5000/api/daily-quizzes/${editQuizId}`, formData, {
+        await axios.put(`https://gyani-vxc9.onrender.com/api/daily-quizzes/${editQuizId}`, formData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         alert("✅ Quiz updated successfully");
       } else {
-        await axios.post("http://localhost:5000/api/daily-quizzes/create", formData, {
+        await axios.post("https://gyani-vxc9.onrender.com/api/daily-quizzes/create", formData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         alert("✅ Quiz added successfully");
@@ -319,7 +319,7 @@ export default function AdminPanel() {
   const deleteQuiz = async (id: string) => {
     if (!window.confirm("Delete this quiz?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/daily-quizzes/${id}`);
+      await axios.delete(`https://gyani-vxc9.onrender.com/api/daily-quizzes/${id}`);
       fetchQuizzes();
     } catch (error) {
       console.error(error);

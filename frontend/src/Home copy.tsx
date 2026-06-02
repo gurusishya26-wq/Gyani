@@ -162,7 +162,7 @@ function Home() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      await axios.post("http://localhost:5000/api/save-user", {
+      await axios.post("https://gyani-vxc9.onrender.com/api/save-user", {
         name: user.displayName,
         email: user.email
       });
