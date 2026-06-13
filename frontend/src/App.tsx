@@ -8,6 +8,7 @@ import BecomeInstructor from './BecomeInstructor.js';
 import Courses from './components/Courses.js';
 import TestPage from './TestPage.js';
 import AdminPanel from "./AdminPanel.js";
+import CourseBuilder from './CourseBuilder.js';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           path="/admin"
           element={<AdminPanel />}
         />
+        <Route path="/admin/course-builder" element={<CourseBuilder />} />
       </Routes>
     </Router>
   );

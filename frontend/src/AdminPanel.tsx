@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 interface Subject {
   name: string;
@@ -27,6 +28,7 @@ interface Quiz {
 }
 
 export default function AdminPanel() {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<'classes' | 'exams' | 'quizzes'>('classes');
   const [loading, setLoading] = useState(false);
 
@@ -108,7 +110,16 @@ export default function AdminPanel() {
     { id: 'classes', label: 'Manage Classes', icon: '📚' },
     { id: 'exams', label: 'Competitive Exams', icon: '🏆' },
     { id: 'quizzes', label: 'Daily Quizzes', icon: '❓' },
+    { id: 'courses', label: 'Create Course', icon: '📖' }
   ] as const;
+
+  const handleMenuClick = (id: string) => {
+    if (id === 'courses') {
+      navigate('/admin/course-builder');   // ← Opens new page
+    } else {
+      setActiveSection(id as 'classes' | 'exams' | 'quizzes');
+    }
+  };
 
   // ==================== CLASS FUNCTIONS ====================
   const addSubject = () => setSubjects(prev => [...prev, { name: "", icon: "" }]);
@@ -335,14 +346,14 @@ export default function AdminPanel() {
           <p className="text-gray-500 text-sm">Admin Dashboard</p>
         </div>
 
-        <div className="p-4">
+                <div className="p-4">
           <nav className="space-y-2">
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => handleMenuClick(item.id)}     // ← CHANGED
                 className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-left font-medium transition-all ${
-                  activeSection === item.id
+                  activeSection === item.id && item.id !== 'courses'   // ← CHANGED
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'hover:bg-gray-100 text-gray-700'
                 }`}
