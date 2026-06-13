@@ -47,17 +47,17 @@ export default function CourseManagement() {
   }, []);
 
   const fetchCourses = async () => {
-    const res = await axios.get("http://localhost:5000/api/courses");
+    const res = await axios.get("https://gyani-vxc9.onrender.com/api/courses");
     setCourses(res.data);
   };
 
   const fetchClasses = async () => {
-    const res = await axios.get("http://localhost:5000/api/classes");
+    const res = await axios.get("https://gyani-vxc9.onrender.com/api/classes");
     setClasses(res.data);
   };
 
   const fetchExams = async () => {
-    const res = await axios.get("http://localhost:5000/api/competitive-exams");
+    const res = await axios.get("https://gyani-vxc9.onrender.com/api/competitive-exams");
     setExams(res.data);
   };
 
@@ -145,7 +145,7 @@ export default function CourseManagement() {
       formData.append("video", file);
 
       const res = await axios.post(
-        "http://localhost:5000/api/upload-video",
+        "https://gyani-vxc9.onrender.com/api/upload-video",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -319,9 +319,9 @@ export default function CourseManagement() {
 };
 
     if (editCourseId) {
-      await axios.put(`http://localhost:5000/api/courses/${editCourseId}`, payload);
+      await axios.put(`https://gyani-vxc9.onrender.com/api/courses/${editCourseId}`, payload);
     } else {
-      await axios.post("http://localhost:5000/api/courses/create", payload);
+      await axios.post("https://gyani-vxc9.onrender.com/api/courses/create", payload);
     }
 
     // Reset
@@ -340,7 +340,7 @@ export default function CourseManagement() {
   };
 
   const deleteCourse = async (id: string) => {
-    await axios.delete(`http://localhost:5000/api/courses/${id}`);
+    await axios.delete(`https://gyani-vxc9.onrender.com/api/courses/${id}`);
     fetchCourses();
   };
 
