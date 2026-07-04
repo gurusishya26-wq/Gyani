@@ -358,9 +358,14 @@ const fetchDailyQuiz =
       <header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-11 h-11 bg-[#5faae0] rounded-3xl flex items-center justify-center text-white font-bold text-3xl shadow-inner">
-              LH
-            </div>
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+  <img 
+    src="https://your-logo-url.com/your-logo.png" 
+    alt="LearningHub" 
+    className="w-11 h-11 object-contain rounded-3xl shadow-inner"
+  />
+  <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
+</div>
             <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
           </div>
 
