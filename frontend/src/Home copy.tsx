@@ -7,7 +7,6 @@ import { auth, googleProvider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
 import GoogleTranslate from "./components/GoogleTranslate";
 
-
 // ==================== TRANSLATIONS ====================
 const translations = {
   en: {
@@ -34,11 +33,6 @@ const translations = {
     browseCourses: "Browse Courses",
 
     exploreLearningPaths: "Explore Learning Paths",
-    categories: ["UPSC/IAS", "SSC CGL", "Banking Exams", "Teaching Exams", "Computer Science", "Skill Development"],
-
-    featuredCourses: "Featured Courses",
-    exploreAll: "Explore All Courses",
-
     meetOurExperts: "Meet Our Expert Instructors",
     whyStudentsLove: "Why Students Love LearningHub",
     whySubtitle: "Everything you need to succeed — in one beautiful platform",
@@ -70,116 +64,7 @@ const translations = {
   }
 };
 
-function Home() {
-  const navigate = useNavigate();
-
-  // State for Daily Quiz Modal
-  const [showDailyQuizModal, setShowDailyQuizModal] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [score, setScore] = useState(0);
-
-  // For testing - Show modal on every refresh
-  useEffect(() => {
-    // Remove localStorage check for testing
-    const timer = setTimeout(() => {
-      setShowDailyQuizModal(true);
-      // Reset quiz state on open
-      setSelectedAnswer(null);
-      setIsSubmitted(false);
-      setScore(0);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // For class section (new UI)
-  const [selectedClassLevel, setSelectedClassLevel] = useState<number | null>(null);
-
-  const [selectedCompetitiveExam, setSelectedCompetitiveExam] = useState<string | null>(null);
-
-  // For modal (self-study)
-  const [modalClass, setModalClass] = useState<string | null>(null);
-
-  const [showModal, setShowModal] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Self-Study Modal States
-  const [showSelfStudyModal, setShowSelfStudyModal] = useState(false);
-  const [step, setStep] = useState(1);           // 1 = class, 2 = subject
-  const [selectedClass, setSelectedClass] = useState<string | null>(null);
-
-  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Higher"];
-
-  const subjects = [
-    "Mathematics", "Science", "Physics", "Chemistry", "Biology", 
-    "English", "Computer Science", "AI & Robotics", "History", "Geography"
-  ];
-  // ==================== HANDLERS ====================
-  const handleClassSelect = (cls: string) => {
-    setModalClass(cls);
-    setStep(2);
-  };
-
-  const handleSubjectSelect = (subject: string) => {
-    if (!modalClass) return;
-
-    // Open courses in new tab with filters
-    const url = `/courses?type=self-study&class=${encodeURIComponent(modalClass)}&subject=${encodeURIComponent(subject)}`;
-    window.open(url, '_blank');
-    
-    // Reset modal
-    setShowSelfStudyModal(false);
-    setStep(1);
-    setModalClass(null);
-  };
-
-  const closeSelfStudyModal = () => {
-    setShowSelfStudyModal(false);
-    setStep(1);
-    setModalClass(null);
-  };
-
-  const t = translations.en;
-
-  // Countdown Timer
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-
-  const formatTime = (seconds: number) => {
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-  };
-
-  // ==================== AUTH FUNCTIONS ====================
-  const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-
-      await axios.post("https://gyani-vxc9.onrender.com/api/save-user", {
-        name: user.displayName,
-        email: user.email
-      });
-
-      localStorage.setItem("user", JSON.stringify({
-        name: user.displayName,
-        email: user.email
-      }));
-
-      setShowModal(false);
-      navigate("/dashboard");
-    } catch (error: any) {
-      alert(error.message);
-    }
-  };
-
-  // ==================== COURSES DATA ====================
+// ==================== COURSES DATA ====================
   const courses = [
     { 
       _id: "1", 
@@ -227,41 +112,215 @@ function Home() {
     }
   ];
 
-  // ==================== TEACHERS DATA ====================
-  const teachers = [
-    { 
-      _id: "t1", 
-      name: "Dr. Arvind Sharma", 
-      experience: "18+ years",
-      bio: "Former IAS officer. Guided 800+ students into civil services.",
-      profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
-      subjects: [{ name: "Polity" }, { name: "Ethics" }] 
-    },
-    { 
-      _id: "t2", 
-      name: "Priya Malhotra", 
-      experience: "12+ years",
-      bio: "Ex-Bank PO and bestselling author for SSC & Banking exams.",
-      profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-      subjects: [{ name: "Quant" }, { name: "Reasoning" }] 
-    },
-    { 
-      _id: "t3", 
-      name: "Rahul Verma", 
-      experience: "15+ years",
-      bio: "Current Affairs expert and popular educator.",
-      profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
-      subjects: [{ name: "Current Affairs" }] 
-    },
-    { 
-      _id: "t4", 
-      name: "Anjali Kapoor", 
-      experience: "9+ years",
-      bio: "CTET topper and pedagogy expert.",
-      profileImage: "https://images.unsplash.com/photo-1580894732441-8d7d2d4e4e4b?auto=format&fit=crop&q=80&w=400",
-      subjects: [{ name: "Pedagogy" }] 
-    },
+// Teachers Data
+const teachers = [
+  { 
+    _id: "t1", 
+    name: "Dr. Arvind Sharma", 
+    experience: "18+ years",
+    bio: "Former IAS officer. Guided 800+ students into civil services.",
+    profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
+    subjects: [{ name: "Polity" }, { name: "Ethics" }] 
+  },
+  { 
+    _id: "t2", 
+    name: "Priya Malhotra", 
+    experience: "12+ years",
+    bio: "Ex-Bank PO and bestselling author for SSC & Banking exams.",
+    profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
+    subjects: [{ name: "Quant" }, { name: "Reasoning" }] 
+  },
+  { 
+    _id: "t3", 
+    name: "Rahul Verma", 
+    experience: "15+ years",
+    bio: "Current Affairs expert and popular educator.",
+    profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
+    subjects: [{ name: "Current Affairs" }] 
+  },
+  { 
+    _id: "t4", 
+    name: "Anjali Kapoor", 
+    experience: "9+ years",
+    bio: "CTET topper and pedagogy expert.",
+    profileImage: "https://images.unsplash.com/photo-1580894732441-8d7d2d4e4e4b?auto=format&fit=crop&q=80&w=400",
+    subjects: [{ name: "Pedagogy" }] 
+  },
+];
+
+function Home() {
+  const navigate = useNavigate();
+
+  // Quiz Modal
+  const [showDailyQuizModal, setShowDailyQuizModal] = useState(false);
+  const [dailyQuiz, setDailyQuiz] = useState<any>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string>("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [score, setScore] = useState(0);
+
+  // Quiz Modal
+ 
+
+  // Dynamic Classes
+  const [classes, setClasses] = useState<any[]>([]);
+
+  // Selection States
+  const [selectedClassLevel, setSelectedClassLevel] = useState<any>(null);
+
+  // Self-Study Modal
+  const [showSelfStudyModal, setShowSelfStudyModal] = useState(false);
+  const [step, setStep] = useState(1);
+  const [modalClass, setModalClass] = useState<string | null>(null);
+
+  // UI States
+  const [showModal, setShowModal] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const t = translations.en;
+
+  const subjects = [
+    "Mathematics", "Science", "Physics", "Chemistry", "Biology", 
+    "English", "Computer Science", "AI & Robotics", "History", "Geography"
   ];
+
+  // ==================== FETCH CLASSES FROM API ====================
+  useEffect(() => {
+    fetchClasses();
+  }, []);
+
+  const fetchClasses = async () => {
+    try {
+      const res = await axios.get("https://gyani-vxc9.onrender.com/api/classes");
+      setClasses(res.data);
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+    }
+  };
+
+  const [
+  competitiveExams,
+  setCompetitiveExams,
+] = useState<any[]>([]);
+
+const [
+  selectedCompetitiveExam,
+  setSelectedCompetitiveExam,
+] = useState<any>(null);
+
+useEffect(() => {
+  fetchCompetitiveExams();
+}, []);
+
+const fetchCompetitiveExams =
+  async () => {
+    try {
+      const res =
+        await axios.get(
+          "https://gyani-vxc9.onrender.com/api/competitive-exams"
+        );
+
+      setCompetitiveExams(
+        res.data
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ==================== EFFECTS ====================
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowDailyQuizModal(true);
+      setSelectedAnswer(null);
+      setIsSubmitted(false);
+      setScore(0);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  useEffect(() => {
+  if (showDailyQuizModal) {
+    fetchDailyQuiz();
+  }
+}, [showDailyQuizModal]);
+
+const fetchDailyQuiz =
+  async () => {
+    try {
+      const res =
+        await axios.get(
+          "https://gyani-vxc9.onrender.com/api/daily-quizzes/random"
+        );
+
+        console.log("RANDOM QUIZ:", res.data);
+
+      setDailyQuiz(res.data);
+
+      // RESET STATES
+      setSelectedAnswer("");
+
+      setIsSubmitted(false);
+
+      setScore(0);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ==================== HANDLERS ====================
+  const handleClassSelect = (cls: string) => {
+    setModalClass(cls);
+    setStep(2);
+  };
+
+  const handleSubjectSelect = (subject: string) => {
+    if (!modalClass) return;
+    const url = `/courses?type=self-study&class=${encodeURIComponent(modalClass)}&subject=${encodeURIComponent(subject)}`;
+    window.open(url, '_blank');
+    closeSelfStudyModal();
+  };
+
+  const closeSelfStudyModal = () => {
+    setShowSelfStudyModal(false);
+    setStep(1);
+    setModalClass(null);
+  };
+
+  const formatTime = (seconds: number) => {
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      await axios.post("https://gyani-vxc9.onrender.com/api/save-user", {
+        name: user.displayName,
+        email: user.email
+      });
+
+      localStorage.setItem("user", JSON.stringify({
+        name: user.displayName,
+        email: user.email
+      }));
+
+      setShowModal(false);
+      navigate("/dashboard");
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -295,148 +354,44 @@ function Home() {
         </div>
       </div>
 
-      
       {/* HEADER */}
       <header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <div 
-            className="flex items-center gap-3 cursor-pointer" 
-            onClick={() => navigate('/')}
-          >
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-11 h-11 bg-[#5faae0] rounded-3xl flex items-center justify-center text-white font-bold text-3xl shadow-inner">
               LH
             </div>
-            <span className="font-bold text-2xl tracking-tighter text-gray-900">
-              {t.logo}
-            </span>
+            <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-10 text-base font-medium text-gray-700">
-            <a 
-              href="#courses"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('courses')?.scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'start'
-                });
-              }}
-              className="hover:text-[#5faae0] transition-colors cursor-pointer"
-            >
-              {t.navCourses}
-            </a>
-            <a 
-              href="#categories"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('categories')?.scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'start'
-                });
-              }}
-              className="hover:text-[#5faae0] transition-colors cursor-pointer"
-            >
-              {t.navCategories}
-            </a>
-
-            {/* Teachers link - Now scrolls to the section */}
-            <a 
-              href="#teachers" 
-              onClick={(e) => {
-                e.preventDefault();           // Prevent default jump
-                const teachersSection = document.getElementById('teachers');
-                if (teachersSection) {
-                  teachersSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                  });
-                }
-              }}
-              className="hover:text-[#5faae0] transition-colors cursor-pointer"
-            >
-              {t.navTeachers}
-            </a>
+            <a href="#courses" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCourses}</a>
+            <a href="#categories" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCategories}</a>
+            <a href="#teachers" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navTeachers}</a>
           </nav>
 
-          {/* Right Side */}
           <div className="flex items-center gap-3">
             <GoogleTranslate />
-
-            {/* Desktop Buttons */}
             <div className="hidden md:flex items-center gap-3">
-              <button
-                onClick={() => setShowModal(true)}
-                className="bg-white border-2 border-[#5faae0] hover:bg-[#f0f9ff] text-[#5faae0] px-6 py-3 rounded-2xl font-semibold transition active:scale-95 whitespace-nowrap"
-              >
-                {t.startFreeTrial || "Start Free Trial"}
+              <button onClick={() => setShowModal(true)} className="bg-white border-2 border-[#5faae0] hover:bg-[#f0f9ff] text-[#5faae0] px-6 py-3 rounded-2xl font-semibold transition">
+                {t.startFreeTrial}
               </button>
-
-              <button
-                onClick={() => {
-                  console.log("Sign In clicked");
-                  // TODO: Add your Sign In logic (navigate('/login') etc.)
-                }}
-                className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-3 rounded-2xl font-semibold transition active:scale-95 whitespace-nowrap"
-              >
-                {t.signIn || "Sign In"}
+              <button onClick={() => setShowModal(true)} className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-3 rounded-2xl font-semibold transition">
+                {t.signIn}
               </button>
             </div>
-
-            {/* Mobile Hamburger */}
-            <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)} 
-              className="md:hidden text-3xl text-gray-700"
-            >
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden text-3xl text-gray-700">
               {isMenuOpen ? '✕' : '☰'}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t px-4 py-5 flex flex-col gap-5 text-base font-medium">
-            <a href="/courses" className="hover:text-[#5faae0]"> {t.navCourses}</a>
-            <a href="#" className="hover:text-[#5faae0]">{t.navCategories}</a>
-            
-            {/* Teachers in Mobile Menu */}
-            <a 
-              href="#teachers"
-              onClick={(e) => {
-                e.preventDefault();
-                const teachersSection = document.getElementById('teachers');
-                if (teachersSection) {
-                  teachersSection.scrollIntoView({ behavior: 'smooth' });
-                  setIsMenuOpen(false);        // Close menu after click
-                }
-              }}
-              className="hover:text-[#5faae0] cursor-pointer"
-            >
-              {t.navTeachers}
-            </a>
-
-            <div className="flex flex-col gap-3 mt-4">
-              <button 
-                onClick={() => { 
-                  setShowModal(true); 
-                  setIsMenuOpen(false); 
-                }}
-                className="bg-white border-2 border-[#5faae0] text-[#5faae0] py-3.5 rounded-2xl font-semibold"
-              >
-                {t.startFreeTrial || "Start Free Trial"}
-              </button>
-
-              <button 
-                onClick={() => { 
-                  // TODO: Add Sign In logic
-                  setIsMenuOpen(false); 
-                }}
-                className="bg-[#5faae0] text-white py-3.5 rounded-2xl font-semibold"
-              >
-                {t.signIn || "Sign In"}
-              </button>
-            </div>
+            <a href="#courses">Courses</a>
+            <a href="#categories">Categories</a>
+            <a href="#teachers">Teachers</a>
+            <button onClick={() => setShowModal(true)} className="bg-[#5faae0] text-white py-3 rounded-2xl">Sign In</button>
           </div>
         )}
       </header>
@@ -475,26 +430,16 @@ function Home() {
             </h1>
             <p className="text-lg md:text-xl text-white/90 max-w-lg">{t.heroSubtitle}</p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button 
-                onClick={() => setShowModal(true)} 
-                className="bg-white text-[#5faae0] font-semibold px-10 py-4 rounded-2xl text-lg shadow-xl hover:scale-105 transition"
-              > 
-                {t.startFree} 
+              <button onClick={() => setShowModal(true)} className="bg-white text-[#5faae0] font-semibold px-10 py-4 rounded-2xl text-lg shadow-xl hover:scale-105 transition">
+                {t.startFree}
               </button>
-              <button 
-                onClick={() => navigate('/courses')} 
-                className="border-2 border-white font-semibold px-10 py-4 rounded-2xl text-lg hover:scale-105 transition"
-              > 
-                {t.browseCourses} 
+              <button onClick={() => navigate('/courses')} className="border-2 border-white font-semibold px-10 py-4 rounded-2xl text-lg hover:scale-105 transition">
+                {t.browseCourses}
               </button>
             </div>
           </div>
           <div className="hidden md:block">
-            <img 
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80" 
-              alt="Learning Platform" 
-              className="rounded-3xl shadow-2xl border-8 border-white/30" 
-            />
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80" alt="Learning" className="rounded-3xl shadow-2xl border-8 border-white/30" />
           </div>
         </div>
       </section>
@@ -566,288 +511,208 @@ function Home() {
         </div>
       </section>
 
-      
-      {/* ====================== SELF STUDY MODAL ====================== */}
-      {showSelfStudyModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
-            {/* Header */}
-            <div className="flex justify-between items-center border-b px-8 py-5">
-              <h3 className="text-2xl font-semibold text-gray-800">Self Study</h3>
-              <button 
-                onClick={closeSelfStudyModal}
-                className="text-gray-400 hover:text-gray-600 text-3xl leading-none"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="p-8">
-              {step === 1 && (
-                <div>
-                  <p className="text-gray-600 mb-6 text-lg">Select your Class</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    {classes.map((cls) => (
-                      <button
-                        key={cls}
-                        onClick={() => handleClassSelect(cls)}
-                        className="p-6 text-left border-2 border-gray-200 rounded-2xl hover:border-[#5faae0] hover:bg-blue-50 transition-all active:scale-[0.98] font-medium text-lg"
-                      >
-                        {cls}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {step === 2 && modalClass && (
-                <div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <button 
-                      onClick={() => setStep(1)}
-                      className="text-[#5faae0] hover:text-blue-700 font-medium flex items-center gap-1"
-                    >
-                      ← Back
-                    </button>
-                    <p className="text-gray-600">
-                      Class <span className="font-semibold text-gray-800">{modalClass}</span> — Choose Subject
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    {subjects.map((subject) => (
-                      <button
-                        key={subject}
-                        onClick={() => handleSubjectSelect(subject)}
-                        className="w-full p-5 text-left border border-gray-200 rounded-2xl hover:border-[#5faae0] hover:bg-indigo-50 transition-all flex justify-between items-center group"
-                      >
-                        <span className="font-medium text-lg">{subject}</span>
-                        <span className="text-2xl text-gray-300 group-hover:text-[#5faae0] transition">→</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ====================== CLASS BASED LEARNING ====================== */}
       <section id="courses" className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-            Choose Your Class
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Choose Your Class</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-            {[8, 9, 10, 11, 12].map((cls) => (
+            {classes.map((cls) => (
               <div
-                key={cls}
+                key={cls._id}
                 onClick={() => setSelectedClassLevel(cls)}
                 className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 active:scale-[0.98]"
               >
                 <div className="h-48 bg-gradient-to-br from-[#5faae0] to-[#3b8bc2] relative overflow-hidden">
-                  {/* Improved fallback image - educational Indian context */}
                   <img
-                    src={`https://picsum.photos/id/${60 + cls}/600/400`}
-                    alt={`Class ${cls} students studying`}
+                    src={cls.image}
+                    alt={cls.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80";
-                    }}
+                    onError={(e) => e.currentTarget.src = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"}
                   />
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
-                  
                   <div className="absolute top-4 right-4 bg-white text-[#5faae0] font-bold text-3xl w-14 h-14 flex items-center justify-center rounded-2xl shadow-md">
-                    {cls}
+                    {cls.classNumber}
                   </div>
                 </div>
-
                 <div className="p-6 text-center">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Class {cls}</h3>
-                  <p className="text-gray-600 text-sm">
-                    Comprehensive courses designed for Class {cls} students
-                  </p>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">{cls.title}</h3>
+                  <p className="text-gray-600 text-sm">{cls.description}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* SUBJECT MODAL - Expanded subjects */}
+        {/* SUBJECT MODAL */}
         {selectedClassLevel && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
             <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
               <div className="p-6 border-b flex items-center justify-between bg-gray-50 rounded-t-3xl">
-                <h3 className="text-2xl font-bold text-gray-800">
-                  Subjects for Class {selectedClassLevel}
-                </h3>
-                <button onClick={() => setSelectedClassLevel(null)} className="text-gray-500 hover:text-gray-700 text-3xl leading-none">
-                  ×
-                </button>
+                <h3 className="text-2xl font-bold text-gray-800">Subjects for {selectedClassLevel.title}</h3>
+                <button onClick={() => setSelectedClassLevel(null)} className="text-3xl">×</button>
               </div>
-
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[65vh]">
-                {[
-                  { name: "Mathematics", icon: "📐" },
-                  { name: "Science", icon: "🧪" },
-                  { name: "English", icon: "📖" },
-                  { name: "Hindi", icon: "🇮🇳" },
-                  { name: "Social Science", icon: "🌍" },
-                  { name: "Computer Science", icon: "💻" },
-                ].map((subject) => (
+                {selectedClassLevel.subjects?.map((subject: any, index: number) => (
                   <div
-                    key={subject.name}
+                    key={index}
                     onClick={() => {
-                      const url = `/courses?class=${selectedClassLevel}&subject=${subject.name.toLowerCase()}`;
+                      const url = `/courses?class=${selectedClassLevel.classNumber}&subject=${subject.name.toLowerCase()}`;
                       window.open(url, "_blank");
                     }}
                     className="flex items-center gap-4 p-5 bg-gray-50 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 rounded-2xl cursor-pointer transition-all group"
                   >
-                    <div className="text-4xl group-hover:scale-110 transition-transform duration-300">
-                      {subject.icon}
-                    </div>
+                    <div className="text-4xl group-hover:scale-110 transition-transform duration-300">{subject.icon}</div>
                     <div className="flex-1">
-                      <p className="font-semibold text-lg text-gray-800 group-hover:text-emerald-700 transition-colors">
-                        {subject.name}
-                      </p>
+                      <p className="font-semibold text-lg text-gray-800 group-hover:text-emerald-700">{subject.name}</p>
                       <p className="text-sm text-gray-500">Explore courses →</p>
                     </div>
                   </div>
                 ))}
               </div>
-
               <div className="p-6 border-t bg-gray-50 rounded-b-3xl flex justify-center">
-                <button onClick={() => setSelectedClassLevel(null)} className="px-10 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors">
-                  Close
-                </button>
+                <button onClick={() => setSelectedClassLevel(null)} className="px-10 py-3 text-gray-600 hover:text-gray-800 font-medium">Close</button>
               </div>
             </div>
           </div>
         )}
       </section>
 
+      
       {/* ====================== COMPETITIVE EXAMS ====================== */}
       <section className="bg-gray-50 py-16">
         <div className="max-w-6xl mx-auto px-4">
+          
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">
             Competitive Exams
           </h2>
+
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
             Targeted preparation for government and banking exams with expert-curated content
           </p>
 
           {/* ===== EXAM CATEGORY CARDS ===== */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { 
-                id: "railway", 
-                title: "Railway Exams", 
-                image: "https://etimg.etb2bimg.com/photo/111281165.cms", 
-                desc: "RRB NTPC, Group D, ALP & Junior Engineer" 
-              },
-              { 
-                id: "ssc", 
-                title: "SSC Exams", 
-                image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80", 
-                desc: "CGL, CHSL, MTS, CPO & Stenographer" 
-              },
-              { 
-                id: "teaching", 
-                title: "Teaching Exams", 
-                image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80", 
-                desc: "CTET, TET, UPTET, REET & DSSSB" 
-              },
-              { 
-                id: "banking", 
-                title: "Banking Exams", 
-                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDqjCOim8VZp4rNbIAj42viB4zeQuaYwpltw&s", 
-                desc: "IBPS PO, Clerk, SBI PO, RBI & LIC" 
-              },
-            ].map((exam) => (
-              <div
-                key={exam.id}
-                onClick={() => setSelectedCompetitiveExam(exam.id)}
-                className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 active:scale-[0.98]"
-              >
-                {/* Card Background Image */}
-                <div className="h-48 relative overflow-hidden">
-                  <img
-                    src={exam.image}
-                    alt={exam.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-                  
-                  {/* Title Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-white text-2xl font-bold">{exam.title}</h3>
+            
+            {competitiveExams.map(
+              (exam: any) => (
+                <div
+                  key={exam._id}
+                  onClick={() =>
+                    setSelectedCompetitiveExam(
+                      exam
+                    )
+                  }
+                  className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 active:scale-[0.98]"
+                >
+                  {/* Card Background Image */}
+                  <div className="h-48 relative overflow-hidden">
+                    
+                    <img
+                      src={exam.image}
+                      alt={exam.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+
+                    {/* Title Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="text-white text-2xl font-bold">
+                        {exam.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-6 text-center">
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {exam.description}
+                    </p>
                   </div>
                 </div>
-
-                {/* Card Content */}
-                <div className="p-6 text-center">
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {exam.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </div>
 
-        {/* ====================== COMPETITIVE EXAM SUBJECT MODAL ====================== */}
+        {/* ====================== SUBJECT MODAL ====================== */}
         {selectedCompetitiveExam && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+            
             <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
-              
+
               {/* Modal Header */}
               <div className="p-6 border-b flex items-center justify-between bg-gray-50 rounded-t-3xl">
+                
                 <h3 className="text-2xl font-bold text-gray-800 capitalize">
-                  Subjects for {selectedCompetitiveExam} Exams
+                  Subjects for{" "}
+                  {
+                    selectedCompetitiveExam.title
+                  }
                 </h3>
+
                 <button
-                  onClick={() => setSelectedCompetitiveExam(null)}
+                  onClick={() =>
+                    setSelectedCompetitiveExam(
+                      null
+                    )
+                  }
                   className="text-gray-500 hover:text-gray-700 text-3xl leading-none"
                 >
                   ×
                 </button>
               </div>
 
-              {/* Subjects List */}
+              {/* Subjects */}
               <div className="p-6 space-y-4 overflow-y-auto max-h-[65vh]">
-                {[
-                  { name: "English", desc: "Grammar, Vocabulary & Comprehension" },
-                  { name: "Verbal Reasoning", desc: "Logical & Analytical Reasoning" },
-                  { name: "Non Verbal Reasoning", desc: "Pattern, Series & Figure Analysis" },
-                  { name: "Quantitative Aptitude", desc: "Maths & Data Interpretation" },
-                  { name: "General Awareness", desc: "Current Affairs & GK" },
-                ].map((subject) => (
-                  <div
-                    key={subject.name}
-                    onClick={() => {
-                      const url = `/courses?type=competitive&exam=${selectedCompetitiveExam}&subject=${subject.name.toLowerCase().replace(/\s+/g, '-')}`;
-                      window.open(url, "_blank");
-                    }}
-                    className="flex items-center gap-5 p-6 bg-gray-50 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 rounded-2xl cursor-pointer transition-all group"
-                  >
-                    <div className="flex-1">
-                      <p className="font-semibold text-xl text-gray-800 group-hover:text-emerald-700 transition-colors">
-                        {subject.name}
-                      </p>
-                      <p className="text-gray-600 text-sm mt-1">{subject.desc}</p>
+                
+                {selectedCompetitiveExam.subjects.map(
+                  (
+                    subject: any,
+                    index: number
+                  ) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        const url =
+                          `/courses?type=competitive&exam=${selectedCompetitiveExam.title}&subject=${subject.name.toLowerCase().replace(/\s+/g, "-")}`;
+
+                        window.open(
+                          url,
+                          "_blank"
+                        );
+                      }}
+                      className="flex items-center gap-5 p-6 bg-gray-50 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 rounded-2xl cursor-pointer transition-all group"
+                    >
+                      <div className="flex-1">
+                        
+                        <p className="font-semibold text-xl text-gray-800 group-hover:text-emerald-700 transition-colors">
+                          {subject.name}
+                        </p>
+
+                        <p className="text-gray-600 text-sm mt-1">
+                          {subject.desc}
+                        </p>
+                      </div>
+
+                      <span className="text-3xl text-gray-300 group-hover:text-emerald-600 transition">
+                        →
+                      </span>
                     </div>
-                    <span className="text-3xl text-gray-300 group-hover:text-emerald-600 transition">→</span>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
 
-              {/* Modal Footer */}
+              {/* Footer */}
               <div className="p-6 border-t bg-gray-50 rounded-b-3xl text-center">
+                
                 <button
-                  onClick={() => setSelectedCompetitiveExam(null)}
+                  onClick={() =>
+                    setSelectedCompetitiveExam(
+                      null
+                    )
+                  }
                   className="px-10 py-3 text-gray-600 hover:text-gray-800 font-medium"
                 >
                   Close
@@ -1184,90 +1049,129 @@ function Home() {
         </div>
       )}
 
-      {/* ====================== DAILY QUIZ MODAL - KID FRIENDLY ====================== */}
-      {showDailyQuizModal && (
+      {/* ====================== DAILY QUIZ MODAL - KID FRIENDLY (Improved) ====================== */}
+      {showDailyQuizModal && dailyQuiz && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl max-h-[95vh] flex flex-col">
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
 
-            {/* Fun Header - Fixed */}
-            <div className="bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] p-8 text-white text-center relative flex-shrink-0">
+            {/* Compact Header */}
+            <div className="bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] p-4 text-white text-center relative flex-shrink-0">
               <button
                 onClick={() => setShowDailyQuizModal(false)}
-                className="absolute top-4 right-4 text-white text-5xl leading-none hover:scale-110 transition"
+                className="absolute top-3 right-4 text-white text-4xl leading-none hover:scale-110 transition"
               >
                 ×
               </button>
 
-              <div className="mx-auto w-20 h-20 bg-white/30 backdrop-blur-md rounded-3xl flex items-center justify-center mb-4 text-6xl">
+              <div className="mx-auto w-12 h-12 bg-white/30 backdrop-blur-md rounded-3xl flex items-center justify-center mb-2 text-4xl">
                 🏆
               </div>
-              <h2 className="text-3xl font-bold">Daily Quiz Time! 🎉</h2>
-              <p className="text-white/90 mt-2 text-lg">1 Easy Question</p>
+              <h2 className="text-lg font-bold">Daily Quiz! 🎉</h2>
+              <p className="text-white/90 text-xs mt-0.5">1 Easy Question</p>
             </div>
 
-            {/* Scrollable Content Area */}
-            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-              <div className="mb-8 text-center">
-                <div className="inline-block bg-blue-100 text-blue-700 text-sm font-bold px-4 py-1 rounded-full mb-3">
-                  GENERAL KNOWLEDGE
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800 leading-relaxed">
-                  Who was the first President of India? 🇮🇳
-                </h3>
-              </div>
+            {/* Main Content */}
+            <div className="flex-1 p-4 flex flex-col overflow-hidden">
 
-              {/* Simple Options */}
-              <div className="space-y-4">
-                {[
-                  { id: "A", text: "Jawaharlal Nehru" },
-                  { id: "B", text: "Dr. Rajendra Prasad" },
-                  { id: "C", text: "Sardar Vallabhbhai Patel" },
-                  { id: "D", text: "B.R. Ambedkar" }
-                ].map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => !isSubmitted && setSelectedAnswer(option.id)}
-                    className={`w-full text-left p-5 rounded-2xl border-2 text-lg transition-all font-medium ${
-                      selectedAnswer === option.id 
-                        ? 'border-[#5faae0] bg-blue-50 shadow-md' 
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                    } ${isSubmitted ? 'cursor-default' : 'cursor-pointer'}`}
-                  >
-                    <span className="inline-block w-8 h-8 bg-[#5faae0] text-white rounded-xl text-center leading-8 mr-4 font-bold">
-                      {option.id}
-                    </span>
-                    {option.text}
-                  </button>
-                ))}
-              </div>
+              {!isSubmitted ? (
+                <>
+                  {/* Question */}
+                  <div className="mb-6 text-center">
+                    <div className="inline-block bg-blue-100 text-blue-700 text-[10px] font-bold px-3 py-0.5 rounded-full mb-3">
+                      {dailyQuiz?.category || "GENERAL KNOWLEDGE"}
+                    </div>
 
-              {/* Result */}
-              {isSubmitted && (
-                <div className="mt-10 p-6 rounded-3xl text-center">
-                  {score === 1 ? (
-                    <div className="bg-green-100 border border-green-300 rounded-3xl p-8">
-                      <p className="text-6xl mb-4">🎉🥳🎉</p>
-                      <p className="text-3xl font-bold text-green-600">Yay! You got it right!</p>
-                      <p className="text-xl mt-3 text-gray-700">
-                        Great Job! You earned 50 Coins + Daily Badge!
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-orange-100 border border-orange-200 rounded-3xl p-8">
-                      <p className="text-5xl mb-4">😊</p>
-                      <p className="text-2xl font-bold text-orange-600">Don't worry!</p>
-                      <p className="mt-4 text-gray-700 text-lg">
-                        The correct answer is <span className="font-bold">B. Dr. Rajendra Prasad</span>
-                      </p>
-                      <p className="text-sm text-gray-500 mt-3">Better luck next time champion! 💪</p>
-                    </div>
-                  )}
+                    <h3 className="text-base font-bold text-gray-800 leading-tight px-2">
+                      {dailyQuiz?.title}
+                    </h3>
+
+                    {/* Question Image - Improved */}
+                    {dailyQuiz?.questionImage && (
+                      <div className="mt-5 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200">
+                        <img
+                          src={dailyQuiz.questionImage}
+                          alt="Question"
+                          className="w-full h-auto max-h-[280px] object-contain mx-auto"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Dynamic Options */}
+                  <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                    {(dailyQuiz?.options || []).map((option: any) => (
+                      <button
+                        key={option.id}
+                        onClick={() => !isSubmitted && setSelectedAnswer(option.id)}
+                        className={`w-full text-left p-4 rounded-3xl border-2 transition-all ${
+                          selectedAnswer === option.id
+                            ? "border-[#5faae0] bg-blue-50 shadow-md"
+                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex gap-4 items-start">
+                          {/* Option Label */}
+                          <div className="w-8 h-8 bg-[#5faae0] text-white rounded-2xl flex-shrink-0 flex items-center justify-center font-bold text-sm mt-0.5">
+                            {option.id}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            {/* Option Image - Improved */}
+                            {option.image && (
+                              <div className="w-full aspect-video bg-gray-100 rounded-xl overflow-hidden border border-gray-200 mb-3">
+                                <img
+                                  src={option.image}
+                                  alt={option.id}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            )}
+
+                            {/* Option Text */}
+                            {option.text && (
+                              <p className="font-medium text-gray-800 leading-relaxed">
+                                {option.text}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                /* Result Section */
+                <div className="flex-1 flex items-center justify-center py-6">
+                  <div className="w-full text-center">
+                    {score === 1 ? (
+                      <div className="bg-green-100 border border-green-300 rounded-3xl p-8">
+                        <p className="text-6xl mb-4">🎉🥳</p>
+                        <p className="text-2xl font-bold text-green-600">Correct!</p>
+                        <p className="text-sm mt-3 text-gray-700">
+                          {dailyQuiz?.reward || "+50 Coins & Daily Badge"}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="bg-orange-100 border border-orange-200 rounded-3xl p-8">
+                        <p className="text-5xl mb-4">😊</p>
+                        <p className="text-xl font-bold text-orange-600">Not this time</p>
+                        <p className="mt-4 text-sm text-gray-700">
+                          Correct Answer:{" "}
+                          <span className="font-bold text-orange-700">
+                            {dailyQuiz?.options?.find(
+                              (o: any) => o.id === dailyQuiz?.correctAnswer
+                            )?.text || dailyQuiz?.correctAnswer}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Footer Buttons - Fixed */}
-            <div className="border-t p-6 flex flex-col gap-3 flex-shrink-0">
+            {/* Footer */}
+            <div className="border-t p-4 flex flex-col gap-2.5 flex-shrink-0">
               {!isSubmitted ? (
                 <button
                   onClick={() => {
@@ -1276,24 +1180,24 @@ function Home() {
                       return;
                     }
                     setIsSubmitted(true);
-                    setScore(selectedAnswer === "B" ? 1 : 0);
+                    setScore(selectedAnswer === dailyQuiz?.correctAnswer ? 1 : 0);
                   }}
-                  className="w-full bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] hover:brightness-110 text-white font-bold py-5 rounded-2xl text-xl transition active:scale-95"
+                  className="w-full bg-gradient-to-r from-[#5faae0] to-[#3b8ac7] text-white font-bold py-3.5 rounded-2xl text-base transition active:scale-95"
                 >
-                  Submit My Answer
+                  Submit Answer
                 </button>
               ) : (
                 <button
                   onClick={() => setShowDailyQuizModal(false)}
-                  className="w-full bg-gray-900 hover:bg-black text-white font-bold py-5 rounded-2xl text-xl transition"
+                  className="w-full bg-gray-900 hover:bg-black text-white font-bold py-3.5 rounded-2xl text-base transition"
                 >
-                  Close & Continue Learning
+                  Close & Continue
                 </button>
               )}
 
               <button
                 onClick={() => setShowDailyQuizModal(false)}
-                className="text-gray-500 hover:text-gray-700 py-3 text-base font-medium"
+                className="text-gray-500 hover:text-gray-700 py-1 text-xs font-medium"
               >
                 Skip for today
               </button>
@@ -1301,6 +1205,7 @@ function Home() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

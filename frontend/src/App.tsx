@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Home from './Home.js';
 import Dashboard from './Dashboard.js';
-import CoursePage from './components/CoursePage.js';
 import BecomeInstructor from './BecomeInstructor.js';
 import Courses from './components/Courses.js';
-import TestPage from './TestPage.js';
+import CourseDetail from './components/CourseDetail.js';
+import TestPage from './components/TestPage.js';
 import AdminPanel from "./AdminPanel.js";
 import CourseBuilder from './CourseBuilder.js';
 
@@ -16,10 +16,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/course/:id" element={<CoursePage />} />
         <Route path="/become-instructor" element={<BecomeInstructor />} />
-        <Route path="/test" element={<TestPage />} />
         <Route path="/courses" element={<Courses />} />
+
+        <Route path="/course/:id" element={<CourseDetail />} />
+
+        <Route path="/test" element={<TestPage />} /> 
         <Route path="*" element={<Home />} />
         <Route
           path="/admin"

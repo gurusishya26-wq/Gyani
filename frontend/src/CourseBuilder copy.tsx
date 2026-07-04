@@ -2,15 +2,14 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function CourseBuilder() {
-  const API_BASE = "https://gyani-vxc9.onrender.com/";
+  // ================= CONFIG =================
+  const API_BASE = "https://gyani-vxc9.onrender.com/";   // ← Change to production URL when deploying
 
-  // ================= BASIC COURSE INFO =================
+  // ================= CORE STATE =================
   const [courseTitle, setCourseTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [courseType, setCourseType] = useState("");
-  const [courseImage, setCourseImage] = useState("");
-  const [introVideo, setIntroVideo] = useState("");
 
   const [parentId, setParentId] = useState("");
   const [subjectName, setSubjectName] = useState("");
@@ -22,10 +21,11 @@ export default function CourseBuilder() {
   const [subjects, setSubjects] = useState<any[]>([]);
 
   const [editCourseId, setEditCourseId] = useState("");
-  const [filterType, setFilterType] = useState(""); // Filter
 
+  // ================= TESTS =================
   const [courseTest, setCourseTest] = useState({ questions: [] as any[] });
 
+  // ================= CHAPTERS & LESSONS =================
   const [chapters, setChapters] = useState([
     {
       title: "",
@@ -77,19 +77,6 @@ export default function CourseBuilder() {
     }
   };
 
-  // ================= DELETE COURSE =================
-  const deleteCourse = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this course?")) return;
-
-    try {
-      await axios.delete(`${API_BASE}/api/courses/${id}`);
-      alert("Course deleted successfully");
-      fetchCourses();
-    } catch (err) {
-      alert("Failed to delete course");
-    }
-  };
-
   // ================= PARENT =================
   const handleParentChange = (type: string, id: string) => {
     setParentId(id);
@@ -103,7 +90,7 @@ export default function CourseBuilder() {
     }
   };
 
-  // ================= FILE UPLOAD =================
+  // ================= FILE UPLOAD HELPER =================
   const uploadFile = async (
     file: File | undefined,
     type: "pdf" | "video" | "image",
@@ -135,16 +122,7 @@ export default function CourseBuilder() {
     }
   };
 
-  const uploadCourseImage = async (file: File | undefined) => {
-    if (!file) return;
-    uploadFile(file, "image", setCourseImage);
-  };
-
-  const uploadIntroVideo = async (file: File | undefined) => {
-    if (!file) return;
-    uploadFile(file, "video", setIntroVideo);
-  };
-
+  // ================= PDF UPLOAD HANDLERS =================
   const uploadLessonNotes = async (chapterIndex: number, lessonIndex: number, file: File | undefined) => {
     if (!file) return;
     setChapters((prev) => {
@@ -179,7 +157,7 @@ export default function CourseBuilder() {
     uploadFile(file, "pdf", setCourseNotesUrl);
   };
 
-  // ================= CHAPTER & LESSON =================
+  // ================= CHAPTER & LESSON HELPERS =================
   const addChapter = () => {
     setChapters((prev) => [
       ...prev,
@@ -217,6 +195,7 @@ export default function CourseBuilder() {
     });
   };
 
+  // ================= VIDEO HELPERS =================
   const addVideo = (chapterIndex: number, lessonIndex: number) => {
     setChapters((prev) => {
       const updated = [...prev];
@@ -313,6 +292,30 @@ export default function CourseBuilder() {
     }));
   };
 
+  const deleteQuestion = (chapterIndex: number, lessonIndex: number, questionIndex: number) => {
+    setChapters((prev) => {
+      const updated = [...prev];
+      updated[chapterIndex].lessons[lessonIndex].test.questions.splice(questionIndex, 1);
+      return updated;
+    });
+  };
+
+  const deleteChapterQuestion = (chapterIndex: number, questionIndex: number) => {
+    setChapters((prev) => {
+      const updated = [...prev];
+      updated[chapterIndex].test.questions.splice(questionIndex, 1);
+      return updated;
+    });
+  };
+
+  const deleteCourseQuestion = (questionIndex: number) => {
+    setCourseTest((prev) => ({
+      ...prev,
+      questions: prev.questions.filter((_, i) => i !== questionIndex),
+    }));
+  };
+
+  // ================= IMAGE UPLOAD =================
   const uploadQuestionImage = async (
     chapterIndex: number | null,
     lessonIndex: number | null,
@@ -322,56 +325,110 @@ export default function CourseBuilder() {
     file: File | undefined
   ) => {
     if (!file) return;
-    uploadFile(file, "image", (imageUrl) => {
-      if (isCourseTest) {
-        setCourseTest((prev) => {
-          const updated = { ...prev };
-          updated.questions[questionIndex].imageUrl = imageUrl;
-          return updated;
-        });
-      } else if (chapterIndex !== null) {
-        setChapters((prev) => {
-          const updated = [...prev];
-          if (isChapterTest) {
-            updated[chapterIndex].test.questions[questionIndex].imageUrl = imageUrl;
-          } else if (lessonIndex !== null) {
-            updated[chapterIndex].lessons[lessonIndex].test.questions[questionIndex].imageUrl = imageUrl;
-          }
-          return updated;
-        });
+    uploadFile(
+      file,
+      "image",
+      (imageUrl) => {
+        if (isCourseTest) {
+          setCourseTest((prev) => {
+            const updated = { ...prev };
+            updated.questions[questionIndex].imageUrl = imageUrl;
+            return updated;
+          });
+        } else if (chapterIndex !== null) {
+          setChapters((prev) => {
+            const updated = [...prev];
+            if (isChapterTest) {
+              updated[chapterIndex].test.questions[questionIndex].imageUrl = imageUrl;
+            } else if (lessonIndex !== null) {
+              updated[chapterIndex].lessons[lessonIndex].test.questions[questionIndex].imageUrl = imageUrl;
+            }
+            return updated;
+          });
+        }
       }
-    });
+    );
+  };
+
+  // ================= EDIT =================
+  const editCourse = (course: any) => {
+    setEditCourseId(course._id);
+    setCourseTitle(course.title || "");
+    setDescription(course.description || "");
+    setPrice(course.price || "");
+    setCourseType(course.type || "");
+    setParentId(course.parentId || "");
+    setSubjectName(course.subjectName || "");
+    setCourseNotesUrl(course.notesUrl || "");
+
+    setCourseTest(course.test || { questions: [] });
+
+    setChapters(
+      course.chapters?.length
+        ? course.chapters.map((ch: any) => ({
+            title: ch.title || "",
+            notesUrl: ch.notesUrl || "",
+            lessons: ch.lessons?.length
+              ? ch.lessons.map((ls: any) => ({
+                  title: ls.title || "",
+                  videos: (ls.videos || []).map((v: any) => ({ ...v, progress: 0 })),
+                  notesUrl: ls.notesUrl || "",
+                  uploading: false,
+                  test: ls.test || { questions: [] },
+                }))
+              : [],
+            test: ch.test || { questions: [] },
+          }))
+        : [{ title: "", notesUrl: "", lessons: [], test: { questions: [] } }]
+    );
+
+    if (course.type === "Class") {
+      const selected = classes.find((c: any) => c._id === course.parentId);
+      setSubjects(selected?.subjects || []);
+    }
+    if (course.type === "Exam") {
+      const selected = exams.find((e: any) => e._id === course.parentId);
+      setSubjects(selected?.subjects || []);
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // ================= SAVE =================
+  // ================= SAVE COURSE (FIXED) =================
   const saveCourse = async () => {
-    if (!courseTitle.trim()) return alert("Course Title is required!");
+    if (!courseTitle.trim()) {
+      alert("Course Title is required!");
+      return;
+    }
+    if (!courseType) {
+      alert("Please select Course Type (Class or Exam)!");
+      return;
+    }
 
     const payload = {
       title: courseTitle.trim(),
       description: description.trim(),
       price: price.trim(),
       type: courseType,
-      parentId,
-      subjectName,
-      imageUrl: courseImage,
-      introVideoUrl: introVideo,
-      notesUrl: courseNotesUrl,
-      chapters: chapters
-        .filter(ch => ch.title.trim() !== "")
-        .map((chapter) => ({
-          title: chapter.title.trim(),
-          notesUrl: chapter.notesUrl || undefined,
-          lessons: chapter.lessons.map((lesson) => ({
-            title: lesson.title.trim(),
-            videos: lesson.videos,
-            notesUrl: lesson.notesUrl || undefined,
-            test: lesson.test,
-          })),
-          test: chapter.test,
+      parentId: parentId || undefined,
+      subjectName: subjectName || undefined,
+      notesUrl: courseNotesUrl || undefined,
+      chapters: chapters.map((chapter) => ({
+        title: chapter.title.trim(),
+        notesUrl: chapter.notesUrl || undefined,
+        lessons: chapter.lessons.map((lesson) => ({
+          title: lesson.title.trim(),
+          videos: lesson.videos,
+          notesUrl: lesson.notesUrl || undefined,
+          test: lesson.test,
         })),
+        test: chapter.test,
+      })),
       test: courseTest,
     };
+
+    console.log("Sending Payload:", payload);   // For debugging
 
     try {
       if (editCourseId) {
@@ -384,7 +441,7 @@ export default function CourseBuilder() {
       fetchCourses();
     } catch (err: any) {
       console.error(err);
-      alert("Failed to save course: " + (err.response?.data?.error || err.message));
+      alert("Failed to save course: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -394,8 +451,6 @@ export default function CourseBuilder() {
     setDescription("");
     setPrice("");
     setCourseType("");
-    setCourseImage("");
-    setIntroVideo("");
     setParentId("");
     setSubjectName("");
     setCourseNotesUrl("");
@@ -404,22 +459,17 @@ export default function CourseBuilder() {
     setChapters([{ title: "", notesUrl: "", lessons: [], test: { questions: [] } }]);
   };
 
-  const editCourse = (course: any) => {
-    setEditCourseId(course._id);
-    setCourseTitle(course.title || "");
-    setDescription(course.description || "");
-    setPrice(course.price || "");
-    setCourseType(course.type || "");
-    setCourseImage(course.imageUrl || "");
-    setIntroVideo(course.introVideoUrl || "");
-    setParentId(course.parentId || "");
-    setSubjectName(course.subjectName || "");
-    setCourseNotesUrl(course.notesUrl || "");
-    setCourseTest(course.test || { questions: [] });
-    setChapters(course.chapters || [{ title: "", notesUrl: "", lessons: [], test: { questions: [] } }]);
+  const deleteCourse = async (id: string) => {
+    if (!window.confirm("Delete this course?")) return;
+    try {
+      await axios.delete(`${API_BASE}/api/courses/${id}`);
+      fetchCourses();
+    } catch (err) {
+      alert("Failed to delete course");
+    }
   };
 
-  // ================= RENDERERS =================
+  // ================= REUSABLE RENDERERS =================
   const renderNotesUploader = (
     label: string,
     currentUrl: string,
@@ -436,7 +486,12 @@ export default function CourseBuilder() {
       />
       {isUploading && <p className="text-blue-600 mt-2">Uploading PDF...</p>}
       {currentUrl && (
-        <a href={currentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-2 mt-3">
+        <a
+          href={currentUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline flex items-center gap-2 mt-3"
+        >
           📄 View/Download Notes PDF
         </a>
       )}
@@ -469,13 +524,14 @@ export default function CourseBuilder() {
         {q.imageUrl && (
           <div className="mt-3">
             <img src={q.imageUrl} alt="Question" className="max-w-full h-auto border rounded-lg shadow" />
+            <p className="text-green-600 text-sm mt-1">✅ Image Uploaded</p>
           </div>
         )}
       </div>
 
       <input
         type="text"
-        placeholder="Question Text"
+        placeholder="Question Text (optional if using image)"
         value={q.question || ""}
         onChange={(e) => onQuestionChange(e.target.value)}
         className="w-full border p-3 rounded-xl mb-3"
@@ -509,35 +565,13 @@ export default function CourseBuilder() {
     </div>
   );
 
+  // ================= UI =================
   return (
     <div className="p-10 max-w-7xl mx-auto">
       <h1 className="text-4xl font-bold mb-8">Course Builder</h1>
 
       <div className="bg-white p-8 rounded-2xl shadow-xl">
-        {/* Course Image */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Course Thumbnail Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => uploadCourseImage(e.target.files?.[0])}
-            className="w-full border p-3 rounded-xl"
-          />
-          {courseImage && <img src={courseImage} alt="Thumbnail" className="mt-4 w-48 h-32 object-cover rounded-xl" />}
-        </div>
-
-        {/* Intro Video */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Intro Video (Optional)</label>
-          <input
-            type="file"
-            accept="video/*"
-            onChange={(e) => uploadIntroVideo(e.target.files?.[0])}
-            className="w-full border p-3 rounded-xl"
-          />
-          {introVideo && <p className="text-green-600 mt-2">✅ Intro Video Uploaded</p>}
-        </div>
-
+        {/* Basic Info */}
         <input value={courseTitle} onChange={(e) => setCourseTitle(e.target.value)} placeholder="Course Title" className="w-full border p-4 rounded-xl mb-4" />
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="w-full border p-4 rounded-xl mb-4 h-28" />
         <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price (₹)" className="w-full border p-4 rounded-xl mb-4" />
@@ -567,7 +601,6 @@ export default function CourseBuilder() {
           {subjects.map((s: any, i: number) => <option key={i} value={s.name}>{s.name}</option>)}
         </select>
 
-        {/* Chapters & Lessons */}
         <h2 className="text-2xl font-bold mb-6">Chapters & Lessons</h2>
 
         {chapters.map((ch, i) => (
@@ -577,6 +610,8 @@ export default function CourseBuilder() {
             {ch.lessons.map((ls, j) => (
               <div key={j} className="bg-white border p-6 rounded-xl mb-8">
                 <input value={ls.title} onChange={(e) => updateLesson(i, j, e.target.value)} placeholder="Lesson Title" className="w-full border p-4 rounded-xl mb-4" />
+
+                <button onClick={() => addVideo(i, j)} className="bg-indigo-600 text-white px-5 py-2 rounded-lg mb-4">+ Add Video</button>
 
                 {ls.videos.map((video: any, vIndex: number) => (
                   <div key={vIndex} className="border p-4 rounded-lg mb-4">
@@ -599,18 +634,23 @@ export default function CourseBuilder() {
                       onChange={(e) => uploadLessonVideo(i, j, vIndex, e.target.files?.[0])}
                       className="w-full border p-3 rounded-xl"
                     />
-                    {video.progress > 0 && <p className="text-center text-sm mt-1">{video.progress}%</p>}
+                    {video.progress > 0 && (
+                      <div className="mt-3">
+                        <div className="w-full bg-gray-200 h-3 rounded-full">
+                          <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${video.progress}%` }} />
+                        </div>
+                        <p className="text-center text-sm mt-1">{video.progress}%</p>
+                      </div>
+                    )}
                     {video.videoUrl && <p className="text-green-600 mt-2">✅ Uploaded</p>}
                   </div>
                 ))}
 
-                <button onClick={() => addVideo(i, j)} className="bg-indigo-600 text-white px-5 py-2 rounded-lg mb-6">+ Add Video</button>
-
                 {renderNotesUploader("Lesson Notes (PDF)", ls.notesUrl, (file) => uploadLessonNotes(i, j, file), ls.uploading)}
 
-                {/* Lesson Test */}
                 <div className="mt-8">
                   <h3 className="font-bold mb-3">Lesson Test</h3>
+                  <button onClick={() => addQuestion(i, j)} className="bg-orange-600 text-white px-5 py-2 rounded-lg mb-4">+ Add Lesson Question</button>
                   {ls.test?.questions?.map((q: any, qIndex: number) =>
                     renderQuestion(q, qIndex, i, j, false, false,
                       (val) => setChapters((prev) => { const u = [...prev]; u[i].lessons[j].test.questions[qIndex].question = val; return u; }),
@@ -619,7 +659,6 @@ export default function CourseBuilder() {
                       () => deleteQuestion(i, j, qIndex)
                     )
                   )}
-                  <button onClick={() => addQuestion(i, j)} className="bg-orange-600 text-white px-5 py-2 rounded-lg mt-4">+ Add Question</button>
                 </div>
               </div>
             ))}
@@ -628,9 +667,9 @@ export default function CourseBuilder() {
 
             {renderNotesUploader("Chapter Notes (PDF)", ch.notesUrl, (file) => uploadChapterNotes(i, file))}
 
-            {/* Chapter Test */}
             <div className="mt-10 pt-6 border-t">
               <h3 className="font-bold mb-3">Chapter Test</h3>
+              <button onClick={() => addChapterQuestion(i)} className="bg-purple-600 text-white px-5 py-2 rounded-lg mb-4">+ Add Chapter Question</button>
               {ch.test?.questions?.map((q: any, qIndex: number) =>
                 renderQuestion(q, qIndex, i, null, true, false,
                   (val) => setChapters((prev) => { const u = [...prev]; u[i].test.questions[qIndex].question = val; return u; }),
@@ -639,16 +678,18 @@ export default function CourseBuilder() {
                   () => deleteChapterQuestion(i, qIndex)
                 )
               )}
-              <button onClick={() => addChapterQuestion(i)} className="bg-purple-600 text-white px-5 py-2 rounded-lg mt-4">+ Add Question</button>
             </div>
           </div>
         ))}
 
-        <button onClick={addChapter} className="bg-purple-600 text-white px-8 py-4 rounded-xl">+ Add Chapter</button>
+        <div className="flex gap-4 mt-8">
+          <button onClick={addChapter} className="bg-purple-600 text-white px-8 py-4 rounded-xl">+ Add Chapter</button>
+        </div>
 
         {/* Course Final Test */}
         <div className="mt-12">
           <h2 className="text-2xl font-bold mb-4">Course Final Test</h2>
+          <button onClick={addCourseQuestion} className="bg-indigo-600 text-white px-5 py-2 rounded-lg mb-4">+ Add Course Question</button>
           {courseTest.questions.map((q, qIndex) =>
             renderQuestion(q, qIndex, null, null, false, true,
               (val) => { const u = { ...courseTest }; u.questions[qIndex].question = val; setCourseTest(u); },
@@ -657,7 +698,6 @@ export default function CourseBuilder() {
               () => deleteCourseQuestion(qIndex)
             )
           )}
-          <button onClick={addCourseQuestion} className="bg-indigo-600 text-white px-5 py-2 rounded-lg mt-4">+ Add Question</button>
         </div>
 
         {/* Course Notes */}
@@ -672,37 +712,21 @@ export default function CourseBuilder() {
         </div>
       </div>
 
-      {/* ================= EXISTING COURSES ================= */}
+      {/* Existing Courses */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-4">Existing Courses</h2>
-
-        <div className="mb-6">
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="border p-3 rounded-xl">
-            <option value="">All Courses</option>
-            <option value="Class">Class Courses</option>
-            <option value="Exam">Exam Courses</option>
-          </select>
-        </div>
-
-        {courses
-          .filter(c => !filterType || c.type === filterType)
-          .map((c) => {
-            const classInfo = classes.find(cl => cl._id === c.parentId);
-            return (
-              <div key={c._id} className="bg-gray-100 p-5 rounded-xl flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="font-bold">{c.title}</h3>
-                  <p className="text-gray-600">
-                    Class {classInfo?.classNumber || "N/A"} • {c.subjectName} • ₹{c.price || "Free"}
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={() => editCourse(c)} className="bg-blue-500 text-white px-5 py-2 rounded-lg">Edit</button>
-                  <button onClick={() => deleteCourse(c._id)} className="bg-red-500 text-white px-5 py-2 rounded-lg">Delete</button>
-                </div>
-              </div>
-            );
-          })}
+        {courses.map((c) => (
+          <div key={c._id} className="bg-gray-100 p-5 rounded-xl flex justify-between items-center mb-4">
+            <div>
+              <h3 className="font-bold">{c.title}</h3>
+              <p className="text-gray-600">{c.subjectName} • ₹{c.price}</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => editCourse(c)} className="bg-blue-500 text-white px-5 py-2 rounded-lg">Edit</button>
+              <button onClick={() => deleteCourse(c._id)} className="bg-red-500 text-white px-5 py-2 rounded-lg">Delete</button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -549,29 +549,48 @@ const fetchDailyQuiz =
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
             <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
               <div className="p-6 border-b flex items-center justify-between bg-gray-50 rounded-t-3xl">
-                <h3 className="text-2xl font-bold text-gray-800">Subjects for {selectedClassLevel.title}</h3>
-                <button onClick={() => setSelectedClassLevel(null)} className="text-3xl">×</button>
+                <h3 className="text-2xl font-bold text-gray-800">
+                  Subjects for Class {selectedClassLevel.classNumber}
+                </h3>
+                <button 
+                  onClick={() => setSelectedClassLevel(null)} 
+                  className="text-3xl hover:text-red-500 transition-colors"
+                >
+                  ×
+                </button>
               </div>
+
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[65vh]">
                 {selectedClassLevel.subjects?.map((subject: any, index: number) => (
                   <div
                     key={index}
                     onClick={() => {
-                      const url = `/courses?class=${selectedClassLevel.classNumber}&subject=${subject.name.toLowerCase()}`;
+                      // FIXED: Now passing classId (MongoDB _id) instead of classNumber
+                      const url = `/courses?classId=${selectedClassLevel._id}&subject=${encodeURIComponent(subject.name)}`;
                       window.open(url, "_blank");
                     }}
                     className="flex items-center gap-4 p-5 bg-gray-50 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 rounded-2xl cursor-pointer transition-all group"
                   >
-                    <div className="text-4xl group-hover:scale-110 transition-transform duration-300">{subject.icon}</div>
+                    <div className="text-4xl group-hover:scale-110 transition-transform duration-300">
+                      {subject.icon || "📚"}
+                    </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-lg text-gray-800 group-hover:text-emerald-700">{subject.name}</p>
-                      <p className="text-sm text-gray-500">Explore courses →</p>
+                      <p className="font-semibold text-lg text-gray-800 group-hover:text-emerald-700">
+                        {subject.name}
+                      </p>
+                      <p className="text-sm text-gray-500">View available courses →</p>
                     </div>
                   </div>
                 ))}
               </div>
+
               <div className="p-6 border-t bg-gray-50 rounded-b-3xl flex justify-center">
-                <button onClick={() => setSelectedClassLevel(null)} className="px-10 py-3 text-gray-600 hover:text-gray-800 font-medium">Close</button>
+                <button 
+                  onClick={() => setSelectedClassLevel(null)} 
+                  className="px-10 py-3 text-gray-600 hover:text-gray-800 font-medium"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
