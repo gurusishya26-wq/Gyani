@@ -1,86 +1,53 @@
-const mongoose =
-  require("mongoose");
+const mongoose = require("mongoose");
+
+const questionSchema = new mongoose.Schema({
+  question: String,
+  options: [String],
+  correctAnswer: Number,
+  imageUrl: String,
+});
+
+const videoSchema = new mongoose.Schema({
+  title: String,
+  videoUrl: String,
+});
 
 const lessonSchema = new mongoose.Schema({
   title: String,
-
-  videos: [
-    {
-      title: String,
-      videoUrl: String,
-    },
-  ],
-
+  videos: [videoSchema],
+  notesUrl: String,
   test: {
-    questions: [
-      {
-        question: String,
-
-        options: [String],
-
-        correctAnswer: Number,
-      },
-    ],
+    questions: [questionSchema],
   },
 });
 
+const chapterSchema = new mongoose.Schema({
+  title: String,
+  notesUrl: String,
+  lessons: [lessonSchema],
+  test: {
+    questions: [questionSchema],
+  },
+});
 
-const chapterSchema =
-  new mongoose.Schema({
-    title: String,
+const courseSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: String,
+  price: String,
+  type: { type: String, enum: ["Class", "Exam"], required: true },
+  parentId: String,
+  subjectName: String,
 
-    lessons: [
-      lessonSchema,
-    ],
+  // ✅ NEW FIELDS ADDED
+  imageUrl: String,           // Course Thumbnail Image
+  introVideoUrl: String,      // Intro Video
 
-    test: {
-      questions: [
-        {
-          question: String,
+  notesUrl: String,           // Course level notes
 
-          options: [String],
+  chapters: [chapterSchema],
+  test: {
+    questions: [questionSchema],
+  },
+}, { timestamps: true });
 
-          correctAnswer: Number,
-        },
-      ],
-    },
-  });
-
-const courseSchema =
-  new mongoose.Schema({
-    type: String,
-
-    parentId: String,
-
-    parentTitle: String,
-
-    subjectName: String,
-
-    title: String,
-
-    description: String,
-
-    price: Number,
-
-    chapters: [
-      chapterSchema,
-    ],
-
-    test: {
-      questions: [
-        {
-          question: String,
-
-          options: [String],
-
-          correctAnswer: Number,
-        },
-      ],
-    },
-  });
-
-module.exports =
-  mongoose.model(
-    "Course",
-    courseSchema
-  );
+module.exports = mongoose.model("Course", courseSchema);
