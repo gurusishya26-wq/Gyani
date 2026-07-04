@@ -18,7 +18,7 @@ mongoose
 // ====================== MIDDLEWARE ======================
 app.use(
   cors({
-    origin: "https://gyani-vxc9.onrender.com/",
+    origin: "https://gyani-eight.vercel.app",
     credentials: true,
   })
 );
