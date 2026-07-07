@@ -6,6 +6,11 @@ export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // ✅ Correct Dynamic API URL
+  const API_BASE = window.location.hostname === "localhost" 
+    ? "http://localhost:5000" 
+    : "https://gyani-vxc9.onrender.com";
+
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,10 +23,9 @@ export default function CourseDetail() {
     const fetchCourse = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`https://gyani-vxc9.onrender.com//api/courses/${id}`);
+        const res = await axios.get(`${API_BASE}/api/courses/${id}`);
         setCourse(res.data);
 
-        // Load Intro Video first if available
         if (res.data.introVideoUrl) {
           setCurrentVideo({ 
             title: "Course Introduction", 
@@ -113,9 +117,10 @@ export default function CourseDetail() {
           </div>
 
           <h2 className="text-2xl font-bold mb-1">{currentVideo?.title || course.title}</h2>
+          <p className="text-gray-600 mb-8">{course.description}</p>
 
           {/* Tabs */}
-          <div className="flex border-b mb-8 mt-8">
+          <div className="flex border-b mb-8">
             <button
               onClick={() => setActiveTab("about")}
               className={`px-8 py-4 font-medium ${activeTab === "about" ? "border-b-4 border-indigo-600 text-indigo-600" : "text-gray-500"}`}
@@ -154,7 +159,7 @@ export default function CourseDetail() {
           )}
         </div>
 
-        {/* Sidebar - Course Content */}
+        {/* Sidebar */}
         <div className="w-full lg:w-96 bg-white rounded-3xl shadow p-6 self-start sticky top-8">
           <h3 className="font-bold text-xl mb-6">Course Content</h3>
 
@@ -192,7 +197,6 @@ export default function CourseDetail() {
                         </a>
                       )}
 
-                      {/* Lesson Test */}
                       {lesson.test?.questions?.length > 0 && (
                         <button
                           onClick={() => openTest("lesson", chIndex, lsIndex)}
@@ -204,7 +208,6 @@ export default function CourseDetail() {
                     </div>
                   ))}
 
-                  {/* Chapter Notes */}
                   {chapter.notesUrl && (
                     <div className="mt-4 pl-4">
                       <a href={chapter.notesUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-2 text-sm">
@@ -213,7 +216,6 @@ export default function CourseDetail() {
                     </div>
                   )}
 
-                  {/* Chapter Test */}
                   {chapter.test?.questions?.length > 0 && (
                     <button
                       onClick={() => openTest("chapter", chIndex)}
@@ -227,7 +229,6 @@ export default function CourseDetail() {
             </div>
           ))}
 
-          {/* Course Notes */}
           {course.notesUrl && (
             <div className="mt-8 pt-6 border-t">
               <a href={course.notesUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline font-medium">
@@ -236,7 +237,6 @@ export default function CourseDetail() {
             </div>
           )}
 
-          {/* Final Course Test */}
           {course.test?.questions?.length > 0 && (
             <button
               onClick={() => openTest("final")}
