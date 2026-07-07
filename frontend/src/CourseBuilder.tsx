@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function CourseBuilder() {
-  const API_BASE = "https://gyani-vxc9.onrender.com/";
+  const API_BASE = window.location.hostname === "localhost" 
+    ? "http://localhost:5000" 
+    : "https://gyani-vxc9.onrender.com/";  
+  // const API_BASE = "";
 
   // ================= BASIC COURSE INFO =================
   const [courseTitle, setCourseTitle] = useState("");
