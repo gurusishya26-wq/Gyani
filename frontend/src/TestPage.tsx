@@ -1,226 +1,155 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const TestPage = () => {
-  const location = useLocation();
+export default function TestPage() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const { testType, courseTitle, chapterId } = location.state || {};
+  const courseId = searchParams.get("courseId");
+  const testType = searchParams.get("type"); // lesson, chapter, final
+  const chapterIndex = parseInt(searchParams.get("chapter") || "0");
+  const lessonIndex = parseInt(searchParams.get("lesson") || "0");
 
-  // Questions with Image Options
-  const questions = [
-    {
-      id: 1,
-      type: "text",
-      question: "Who was the first President of India?",
-      options: [
-        "Jawaharlal Nehru",
-        "Dr. Rajendra Prasad",
-        "Sardar Vallabhbhai Patel",
-        "B.R. Ambedkar"
-      ],
-      correctAnswer: 1,
-    },
-    {
-      id: 2,
-      type: "image_options",
-      question: "Which shape is different from the others?",
-      options: [
-        "https://picsum.photos/id/1015/300/200",  // Triangle
-        "https://picsum.photos/id/133/300/200",   // Circle
-        "https://picsum.photos/id/201/300/200",   // Square
-        "https://picsum.photos/id/180/300/200"    // Triangle (different)
-      ],
-      optionType: "image",
-      correctAnswer: 1, // Index of correct option
-    },
-    {
-      id: 3,
-      type: "reasoning",
-      question: "If a train travels at 60 km/h for 2 hours and then at 90 km/h for 3 hours, what is the average speed?",
-      options: ["70 km/h", "72 km/h", "78 km/h", "75 km/h"],
-      correctAnswer: 2,
-    },
-    {
-      id: 4,
-      type: "image_options",
-      question: "Which animal lives in water?",
-      options: [
-        "https://picsum.photos/id/237/300/200",   // Dog
-        "https://picsum.photos/id/1005/300/200",  // Cat
-        "https://picsum.photos/id/1018/300/200",  // Fish
-        "https://picsum.photos/id/669/300/200"    // Bird
-      ],
-      optionType: "image",
-      correctAnswer: 2,
-    },
-    {
-      id: 5,
-      type: "image",
-      question: "Identify the pattern and choose the next image:",
-      image: "https://res.cloudinary.com/dvlbqsfyu/image/upload/v1771513630/wu3i7tvtyneyvtjpca2t.png",
-      options: [
-        "https://res.cloudinary.com/dvlbqsfyu/image/upload/v1771512150/azhyfg0tatv73vctvzwf.png",
-        "https://res.cloudinary.com/dvlbqsfyu/image/upload/v1771512160/ipjhhsqocgjgvyc4h2uq.png",
-        "https://res.cloudinary.com/dvlbqsfyu/image/upload/v1771512169/bkjjxexbfh9qwxt3hlii.png",
-        "https://res.cloudinary.com/dvlbqsfyu/image/upload/v1771512160/ipjhhsqocgjgvyc4h2uq.png"
-      ],
-      optionType: "image",
-      correctAnswer: 1,
-    }
-  ];
-
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>(new Array(questions.length).fill(-1));
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [answers, setAnswers] = useState<number[]>([]);
+  const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [course, setCourse] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ Dynamic API Base
+  const API_BASE = window.location.hostname === "localhost" 
+    ? "http://localhost:5000" 
+    : "https://gyani-vxc9.onrender.com";
 
   useEffect(() => {
-    if (!testType) console.error("No test data received");
-  }, [testType]);
+    const fetchTest = async () => {
+      if (!courseId) return;
 
-  const handleOptionSelect = (optionIndex: number) => {
-    if (isSubmitted) return;
-    const newAnswers = [...selectedAnswers];
-    newAnswers[currentQuestion] = optionIndex;
-    setSelectedAnswers(newAnswers);
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_BASE}/api/courses/${courseId}`);
+        setCourse(res.data);
+
+        let selectedQuestions: any[] = [];
+
+        if (testType === "lesson") {
+          selectedQuestions = res.data.chapters?.[chapterIndex]?.lessons?.[lessonIndex]?.test?.questions || [];
+        } else if (testType === "chapter") {
+          selectedQuestions = res.data.chapters?.[chapterIndex]?.test?.questions || [];
+        } else if (testType === "final") {
+          selectedQuestions = res.data.test?.questions || [];
+        }
+
+        setQuestions(selectedQuestions);
+        setAnswers(new Array(selectedQuestions.length).fill(-1));
+      } catch (err) {
+        console.error("Failed to load test:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTest();
+  }, [courseId, testType, chapterIndex, lessonIndex]);
+
+  const handleOptionSelect = (qIndex: number, optionIndex: number) => {
+    const newAnswers = [...answers];
+    newAnswers[qIndex] = optionIndex;
+    setAnswers(newAnswers);
   };
 
-  const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+  const submitTest = () => {
+    let correct = 0;
+    questions.forEach((q, i) => {
+      if (answers[i] === q.correctAnswer) correct++;
+    });
+    setScore(correct);
+    setSubmitted(true);
+  };
+
+  const backToCourse = () => {
+    if (courseId) {
+      window.location.href = `/course/${courseId}`;
     } else {
-      calculateScore();
+      window.close();
     }
   };
 
-  const handlePrevious = () => {
-    if (currentQuestion > 0) setCurrentQuestion(currentQuestion - 1);
-  };
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-2xl">Loading Test...</div>;
+  }
 
-  const calculateScore = () => {
-    let finalScore = 0;
-    selectedAnswers.forEach((answer, index) => {
-      if (answer === questions[index].correctAnswer) finalScore++;
-    });
-    setScore(finalScore);
-    setIsSubmitted(true);
-  };
+  if (submitted) {
+    const percentage = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-md w-full text-center">
+          <div className="text-7xl mb-6">🎉</div>
+          <h2 className="text-4xl font-bold mb-4">Test Completed!</h2>
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
-  const currentQ = questions[currentQuestion];
+          <div className="text-8xl font-bold text-emerald-600 mb-2">{percentage}%</div>
+          <p className="text-2xl text-gray-700 mb-8">{score} / {questions.length} Correct</p>
+
+          <button
+            onClick={backToCourse}
+            className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-semibold hover:bg-indigo-700"
+          >
+            Back to Course
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="mb-6 text-blue-600 flex items-center gap-2 hover:text-blue-700 font-medium"
-        >
-          ← Back to Course
-        </button>
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-3xl mx-auto px-6">
+        <h1 className="text-3xl font-bold mb-8 text-center capitalize">
+          {testType} Test
+        </h1>
 
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
-            <h1 className="text-2xl font-bold">{testType}</h1>
-            <p className="text-blue-100">{courseTitle}</p>
-            <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full bg-white transition-all duration-300" style={{ width: `${progress}%` }} />
-            </div>
-            <p className="text-sm text-blue-100 mt-2 text-right">
-              Question {currentQuestion + 1} of {questions.length}
-            </p>
-          </div>
-
-          {/* Question Area */}
-          {!isSubmitted ? (
-            <div className="p-8 md:p-12">
-              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed mb-8">
-                {currentQ.question}
-              </h2>
-
-              {/* Main Image (if any) */}
-              {currentQ.image && (
-                <div className="mb-8 rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-                  <img 
-                    src={currentQ.image} 
-                    alt="Question" 
-                    className="w-full h-auto max-h-[280px] object-contain bg-gray-50"
-                  />
-                </div>
-              )}
-
-              {/* Options */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {currentQ.options.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleOptionSelect(index)}
-                    className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-center min-h-[140px] hover:shadow-md ${
-                      selectedAnswers[currentQuestion] === index
-                        ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {currentQ.optionType === "image" ? (
-                      <img 
-                        src={option} 
-                        alt={`Option ${String.fromCharCode(65 + index)}`}
-                        className="max-h-[130px] w-full object-contain rounded-xl"
-                      />
-                    ) : (
-                      <div className="flex items-start w-full">
-                        <span className="inline-block w-8 h-8 bg-blue-100 text-blue-700 rounded-xl text-center leading-8 mr-4 font-semibold flex-shrink-0">
-                          {String.fromCharCode(65 + index)}
-                        </span>
-                        <span className="text-lg text-left">{option}</span>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Navigation */}
-              <div className="flex justify-between mt-10">
-                <button
-                  onClick={handlePrevious}
-                  disabled={currentQuestion === 0}
-                  className="px-8 py-3 border border-gray-300 rounded-2xl font-medium disabled:opacity-50"
-                >
-                  Previous
-                </button>
-
-                <button
-                  onClick={handleNext}
-                  disabled={selectedAnswers[currentQuestion] === -1}
-                  className="px-10 py-3 bg-blue-600 text-white rounded-2xl font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {currentQuestion === questions.length - 1 ? "Submit Test" : "Next Question"}
-                </button>
-              </div>
+        <div className="space-y-10">
+          {questions.length === 0 ? (
+            <div className="text-center py-20 text-gray-500">
+              No questions available for this test.
             </div>
           ) : (
-            /* Result Screen */
-            <div className="p-12 text-center">
-              <div className="text-7xl mb-6">🏆</div>
-              <h2 className="text-4xl font-bold text-gray-800">Test Completed!</h2>
-              <p className="text-6xl font-bold text-blue-600 my-6">
-                {score} / {questions.length}
-              </p>
+            questions.map((q, qIndex) => (
+              <div key={qIndex} className="bg-white rounded-3xl p-8 shadow">
+                <p className="font-medium text-lg mb-6">Q{qIndex + 1}. {q.question}</p>
 
-              <button
-                onClick={() => navigate(-1)}
-                className="bg-green-600 text-white px-10 py-4 rounded-2xl text-lg font-medium hover:bg-green-700"
-              >
-                Back to Course
-              </button>
-            </div>
+                <div className="grid gap-3">
+                  {q.options.map((option: string, optIndex: number) => (
+                    <button
+                      key={optIndex}
+                      onClick={() => handleOptionSelect(qIndex, optIndex)}
+                      className={`p-4 text-left rounded-2xl border transition-all ${
+                        answers[qIndex] === optIndex
+                          ? "border-indigo-600 bg-indigo-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))
           )}
         </div>
+
+        {questions.length > 0 && (
+          <button
+            onClick={submitTest}
+            disabled={answers.includes(-1)}
+            className="mt-10 w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white py-4 rounded-2xl font-semibold text-lg"
+          >
+            Submit Test
+          </button>
+        )}
       </div>
     </div>
   );
-};
-
-export default TestPage;
+}
