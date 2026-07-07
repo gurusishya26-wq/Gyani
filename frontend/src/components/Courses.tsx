@@ -11,12 +11,17 @@ export default function Courses() {
   const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Correct Dynamic API URL
+  const API_BASE = window.location.hostname === "localhost" 
+    ? "http://localhost:5000" 
+    : "https://gyani-vxc9.onrender.com";
+
   useEffect(() => {
     const loadData = async () => {
       try {
         const [coursesRes, classesRes] = await Promise.all([
-          axios.get("https://gyani-vxc9.onrender.com//api/courses"),
-          axios.get("https://gyani-vxc9.onrender.com//api/classes")
+          axios.get(`${API_BASE}/api/courses`),
+          axios.get(`${API_BASE}/api/classes`)
         ]);
 
         setCourses(coursesRes.data);
