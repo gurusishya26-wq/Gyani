@@ -7,7 +7,7 @@ export default function TestPage() {
   const navigate = useNavigate();
 
   const courseId = searchParams.get("courseId");
-  const testType = searchParams.get("type"); // lesson, chapter, final
+  const testType = searchParams.get("type");
   const chapterIndex = parseInt(searchParams.get("chapter") || "0");
   const lessonIndex = parseInt(searchParams.get("lesson") || "0");
 
@@ -18,10 +18,8 @@ export default function TestPage() {
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Dynamic API Base
-  const API_BASE = window.location.hostname === "localhost" 
-    ? "http://localhost:5000" 
-    : "https://gyani-vxc9.onrender.com";
+  // ✅ FIXED API URL
+  const API_BASE = "https://gyani-vxc9.onrender.com";
 
   useEffect(() => {
     const fetchTest = async () => {
