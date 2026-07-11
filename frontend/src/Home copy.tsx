@@ -191,7 +191,7 @@ function Home() {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("https://gyani-vxc9.onrender.com/api/classes");
+      const res = await axios.get("http://localhost:5000/api/classes");
       setClasses(res.data);
     } catch (error) {
       console.error("Error fetching classes:", error);
@@ -217,7 +217,7 @@ const fetchCompetitiveExams =
     try {
       const res =
         await axios.get(
-          "https://gyani-vxc9.onrender.com/api/competitive-exams"
+          "http://localhost:5000/api/competitive-exams"
         );
 
       setCompetitiveExams(
@@ -256,7 +256,7 @@ const fetchDailyQuiz =
     try {
       const res =
         await axios.get(
-          "https://gyani-vxc9.onrender.com/api/daily-quizzes/random"
+          "http://localhost:5000/api/daily-quizzes/random"
         );
 
         console.log("RANDOM QUIZ:", res.data);
@@ -305,7 +305,7 @@ const fetchDailyQuiz =
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      await axios.post("https://gyani-vxc9.onrender.com/api/save-user", {
+      await axios.post("http://localhost:5000/api/save-user", {
         name: user.displayName,
         email: user.email
       });

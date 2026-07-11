@@ -191,7 +191,7 @@ function Home() {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("https://gyani-vxc9.onrender.com/api/classes");
+      const res = await axios.get("http://localhost:5000/api/classes");
       setClasses(res.data);
     } catch (error) {
       console.error("Error fetching classes:", error);
@@ -217,7 +217,7 @@ const fetchCompetitiveExams =
     try {
       const res =
         await axios.get(
-          "https://gyani-vxc9.onrender.com/api/competitive-exams"
+          "http://localhost:5000/api/competitive-exams"
         );
 
       setCompetitiveExams(
@@ -256,7 +256,7 @@ const fetchDailyQuiz =
     try {
       const res =
         await axios.get(
-          "https://gyani-vxc9.onrender.com/api/daily-quizzes/random"
+          "http://localhost:5000/api/daily-quizzes/random"
         );
 
         console.log("RANDOM QUIZ:", res.data);
@@ -305,7 +305,7 @@ const fetchDailyQuiz =
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      await axios.post("https://gyani-vxc9.onrender.com/api/save-user", {
+      await axios.post("http://localhost:5000/api/save-user", {
         name: user.displayName,
         email: user.email
       });
@@ -358,14 +358,9 @@ const fetchDailyQuiz =
       <header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-  <img 
-    src="https://your-logo-url.com/your-logo.png" 
-    alt="LearningHub" 
-    className="w-11 h-11 object-contain rounded-3xl shadow-inner"
-  />
-  <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
-</div>
+            <div className="w-11 h-11 bg-[#5faae0] rounded-3xl flex items-center justify-center text-white font-bold text-3xl shadow-inner">
+              LH
+            </div>
             <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
           </div>
 

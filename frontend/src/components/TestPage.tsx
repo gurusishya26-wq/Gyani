@@ -7,7 +7,7 @@ export default function TestPage() {
   const navigate = useNavigate();
 
   const courseId = searchParams.get("courseId");
-  const testType = searchParams.get("type");
+  const testType = searchParams.get("type"); // lesson, chapter, final
   const chapterIndex = parseInt(searchParams.get("chapter") || "0");
   const lessonIndex = parseInt(searchParams.get("lesson") || "0");
 
@@ -16,21 +16,14 @@ export default function TestPage() {
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [course, setCourse] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  // ✅ FIXED API URL
-  const API_BASE = "https://gyani-vxc9.onrender.com";
 
   useEffect(() => {
     const fetchTest = async () => {
-      if (!courseId) return;
-
       try {
-        setLoading(true);
-        const res = await axios.get(`${API_BASE}/api/courses/${courseId}`);
+        const res = await axios.get(`http://localhost:5000//api/courses/${courseId}`);
         setCourse(res.data);
 
-        let selectedQuestions: any[] = [];
+        let selectedQuestions = [];
 
         if (testType === "lesson") {
           selectedQuestions = res.data.chapters?.[chapterIndex]?.lessons?.[lessonIndex]?.test?.questions || [];
@@ -43,13 +36,11 @@ export default function TestPage() {
         setQuestions(selectedQuestions);
         setAnswers(new Array(selectedQuestions.length).fill(-1));
       } catch (err) {
-        console.error("Failed to load test:", err);
-      } finally {
-        setLoading(false);
+        console.error(err);
       }
     };
 
-    fetchTest();
+    if (courseId) fetchTest();
   }, [courseId, testType, chapterIndex, lessonIndex]);
 
   const handleOptionSelect = (qIndex: number, optionIndex: number) => {
@@ -69,18 +60,15 @@ export default function TestPage() {
 
   const backToCourse = () => {
     if (courseId) {
+      window.opener?.postMessage({ action: "refreshCourse" }, "*"); // Optional: refresh course page
       window.location.href = `/course/${courseId}`;
     } else {
       window.close();
     }
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-2xl">Loading Test...</div>;
-  }
-
   if (submitted) {
-    const percentage = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+    const percentage = Math.round((score / questions.length) * 100);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-md w-full text-center">
@@ -109,44 +97,36 @@ export default function TestPage() {
         </h1>
 
         <div className="space-y-10">
-          {questions.length === 0 ? (
-            <div className="text-center py-20 text-gray-500">
-              No questions available for this test.
-            </div>
-          ) : (
-            questions.map((q, qIndex) => (
-              <div key={qIndex} className="bg-white rounded-3xl p-8 shadow">
-                <p className="font-medium text-lg mb-6">Q{qIndex + 1}. {q.question}</p>
+          {questions.map((q, qIndex) => (
+            <div key={qIndex} className="bg-white rounded-3xl p-8 shadow">
+              <p className="font-medium text-lg mb-6">Q{qIndex + 1}. {q.question}</p>
 
-                <div className="grid gap-3">
-                  {q.options.map((option: string, optIndex: number) => (
-                    <button
-                      key={optIndex}
-                      onClick={() => handleOptionSelect(qIndex, optIndex)}
-                      className={`p-4 text-left rounded-2xl border transition-all ${
-                        answers[qIndex] === optIndex
-                          ? "border-indigo-600 bg-indigo-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
+              <div className="grid gap-3">
+                {q.options.map((option: string, optIndex: number) => (
+                  <button
+                    key={optIndex}
+                    onClick={() => handleOptionSelect(qIndex, optIndex)}
+                    className={`p-4 text-left rounded-2xl border transition-all ${
+                      answers[qIndex] === optIndex
+                        ? "border-indigo-600 bg-indigo-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
 
-        {questions.length > 0 && (
-          <button
-            onClick={submitTest}
-            disabled={answers.includes(-1)}
-            className="mt-10 w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white py-4 rounded-2xl font-semibold text-lg"
-          >
-            Submit Test
-          </button>
-        )}
+        <button
+          onClick={submitTest}
+          disabled={answers.includes(-1)}
+          className="mt-10 w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white py-4 rounded-2xl font-semibold text-lg"
+        >
+          Submit Test
+        </button>
       </div>
     </div>
   );

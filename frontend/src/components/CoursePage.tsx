@@ -12,7 +12,7 @@ export default function CourseDetail() {
     const fetchCourse = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`https://gyani-vxc9.onrender.com//api/courses/${id}`);
+        const res = await axios.get(`http://localhost:5000//api/courses/${id}`);
         setCourse(res.data);
       } catch (err) {
         console.error(err);

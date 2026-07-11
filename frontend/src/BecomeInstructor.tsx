@@ -62,7 +62,7 @@ const BecomeInstructor = () => {
 
     // Optional: Send user data to backend
     /*
-    await fetch("https://gyani-vxc9.onrender.com/api/auth/google", {
+    await fetch("http://localhost:5000/api/auth/google", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

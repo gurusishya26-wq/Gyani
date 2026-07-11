@@ -2,10 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function CourseBuilder() {
-  // ✅ Correct API URL
-  const API_BASE = window.location.hostname === "localhost" 
-    ? "http://localhost:5000" 
-    : "https://gyani-vxc9.onrender.com";
+  const API_BASE = "http://localhost:5000";
 
   // ================= BASIC COURSE INFO =================
   const [courseTitle, setCourseTitle] = useState("");
@@ -25,7 +22,7 @@ export default function CourseBuilder() {
   const [subjects, setSubjects] = useState<any[]>([]);
 
   const [editCourseId, setEditCourseId] = useState("");
-  const [filterType, setFilterType] = useState(""); // Filter
+  const [filterType, setFilterType] = useState("");
 
   const [courseTest, setCourseTest] = useState({ questions: [] as any[] });
 
@@ -45,6 +42,17 @@ export default function CourseBuilder() {
       test: { questions: [] as any[] },
     },
   ]);
+
+  // ================= UPLOAD PROGRESS =================
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadType, setUploadType] = useState("");
+  const [uploadStatus, setUploadStatus] = useState("");
+
+  // ================= PREVIEW =================
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState<"video" | "pdf">("video");
+  const [showPreview, setShowPreview] = useState(false);
 
   // ================= FETCH =================
   useEffect(() => {
@@ -80,40 +88,57 @@ export default function CourseBuilder() {
     }
   };
 
-  // ================= DELETE COURSE =================
-  const deleteCourse = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this course?")) return;
+  // ================= DELETE FILE =================
+  const deleteFile = async (fileUrl: string, type: string, chapterIndex?: number, lessonIndex?: number, videoIndex?: number) => {
+    if (!window.confirm(`Delete this ${type}?`)) return;
 
     try {
-      await axios.delete(`${API_BASE}/api/courses/${id}`);
-      alert("Course deleted successfully");
-      fetchCourses();
+      await axios.delete(`${API_BASE}/api/delete-video`, {
+        data: { videoUrl: fileUrl }
+      });
+
+      // Update UI based on type
+      setChapters((prev) => {
+        const updated = [...prev];
+
+        if (type === "Video" && chapterIndex !== undefined && lessonIndex !== undefined && videoIndex !== undefined) {
+          // Delete Video
+          updated[chapterIndex].lessons[lessonIndex].videos.splice(videoIndex, 1);
+        } 
+        else if (type === "PDF") {
+          // Delete PDF
+          if (chapterIndex !== undefined) {
+            if (lessonIndex !== undefined) {
+              updated[chapterIndex].lessons[lessonIndex].notesUrl = "";
+            } else {
+              updated[chapterIndex].notesUrl = "";
+            }
+          } else {
+            setCourseNotesUrl("");
+          }
+        }
+        return updated;
+      });
+
+      alert(`${type} deleted successfully`);
     } catch (err) {
-      alert("Failed to delete course");
+      console.error(err);
+      alert(`Failed to delete ${type}`);
     }
   };
 
-  // ================= PARENT =================
-  const handleParentChange = (type: string, id: string) => {
-    setParentId(id);
-    if (type === "Class") {
-      const selected = classes.find((c: any) => c._id === id);
-      setSubjects(selected?.subjects || []);
-    }
-    if (type === "Exam") {
-      const selected = exams.find((e: any) => e._id === id);
-      setSubjects(selected?.subjects || []);
-    }
-  };
-
-  // ================= FILE UPLOAD =================
+  // ================= UPLOAD WITH PROGRESS =================
   const uploadFile = async (
     file: File | undefined,
     type: "pdf" | "video" | "image",
-    onSuccess: (url: string) => void,
-    onProgress?: (progress: number) => void
+    onSuccess: (url: string) => void
   ) => {
     if (!file) return;
+
+    setUploading(true);
+    setUploadProgress(0);
+    setUploadType(type.toUpperCase());
+    setUploadStatus(`Uploading ${type.toUpperCase()}...`);
 
     try {
       const formData = new FormData();
@@ -122,45 +147,39 @@ export default function CourseBuilder() {
       const res = await axios.post(`${API_BASE}/api/upload-${type}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (progressEvent: any) => {
-          if (onProgress) {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / (progressEvent.total || progressEvent.loaded)
-            );
-            onProgress(percentCompleted);
+          if (progressEvent.total) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(percent);
           }
         },
       });
 
+      setUploadProgress(100);
+      setUploadStatus("✅ Upload Complete!");
+
+      setTimeout(() => {
+        setUploading(false);
+        setUploadProgress(0);
+      }, 800);
+
       onSuccess(res.data.url);
     } catch (err: any) {
       console.error(err);
-      alert(`${type.toUpperCase()} upload failed: ${err.response?.data?.error || err.message}`);
+      setUploadStatus("❌ Upload Failed");
+      setTimeout(() => setUploading(false), 1500);
+      alert(`${type.toUpperCase()} upload failed`);
     }
   };
 
-  const uploadCourseImage = async (file: File | undefined) => {
-    if (!file) return;
-    uploadFile(file, "image", setCourseImage);
-  };
-
-  const uploadIntroVideo = async (file: File | undefined) => {
-    if (!file) return;
-    uploadFile(file, "video", setIntroVideo);
-  };
+  const uploadCourseImage = async (file: File | undefined) => uploadFile(file, "image", setCourseImage);
+  const uploadIntroVideo = async (file: File | undefined) => uploadFile(file, "video", setIntroVideo);
 
   const uploadLessonNotes = async (chapterIndex: number, lessonIndex: number, file: File | undefined) => {
     if (!file) return;
-    setChapters((prev) => {
-      const updated = [...prev];
-      updated[chapterIndex].lessons[lessonIndex].uploading = true;
-      return updated;
-    });
-
     uploadFile(file, "pdf", (url) => {
       setChapters((prev) => {
         const updated = [...prev];
         updated[chapterIndex].lessons[lessonIndex].notesUrl = url;
-        updated[chapterIndex].lessons[lessonIndex].uploading = false;
         return updated;
       });
     });
@@ -177,12 +196,73 @@ export default function CourseBuilder() {
     });
   };
 
-  const uploadCourseNotes = async (file: File | undefined) => {
+  const uploadCourseNotes = async (file: File | undefined) => uploadFile(file, "pdf", setCourseNotesUrl);
+
+  const uploadLessonVideo = async (
+    chapterIndex: number,
+    lessonIndex: number,
+    videoIndex: number,
+    file: File | undefined
+  ) => {
     if (!file) return;
-    uploadFile(file, "pdf", setCourseNotesUrl);
+    uploadFile(file, "video", (url) => {
+      setChapters((prev) => {
+        const updated = [...prev];
+        const video = updated[chapterIndex].lessons[lessonIndex].videos[videoIndex];
+        if (video) {
+          video.videoUrl = url;
+          setPreviewUrl(url);
+          setPreviewType("video");
+          setShowPreview(true);
+        }
+        return updated;
+      });
+    });
   };
 
-  // ================= CHAPTER & LESSON =================
+  const uploadQuestionImage = async (
+    chapterIndex: number | null,
+    lessonIndex: number | null,
+    questionIndex: number,
+    isChapterTest: boolean = false,
+    isCourseTest: boolean = false,
+    file: File | undefined
+  ) => {
+    if (!file) return;
+    uploadFile(file, "image", (imageUrl) => {
+      if (isCourseTest) {
+        setCourseTest((prev) => {
+          const updated = { ...prev };
+          updated.questions[questionIndex].imageUrl = imageUrl;
+          return updated;
+        });
+      } else if (chapterIndex !== null) {
+        setChapters((prev) => {
+          const updated = [...prev];
+          if (isChapterTest) {
+            updated[chapterIndex].test.questions[questionIndex].imageUrl = imageUrl;
+          } else if (lessonIndex !== null) {
+            updated[chapterIndex].lessons[lessonIndex].test.questions[questionIndex].imageUrl = imageUrl;
+          }
+          return updated;
+        });
+      }
+    });
+  };
+
+  // ================= PREVIEW =================
+  const openPreview = (url: string, type: "video" | "pdf") => {
+    setPreviewUrl(url);
+    setPreviewType(type);
+    setShowPreview(true);
+  };
+
+  const closePreview = () => {
+    setShowPreview(false);
+    setPreviewUrl("");
+  };
+
+  // ================= REST OF CODE =================
   const addChapter = () => {
     setChapters((prev) => [
       ...prev,
@@ -232,50 +312,6 @@ export default function CourseBuilder() {
     });
   };
 
-  const uploadLessonVideo = async (
-    chapterIndex: number,
-    lessonIndex: number,
-    videoIndex: number,
-    file: File | undefined
-  ) => {
-    if (!file) return;
-
-    setChapters((prev) => {
-      const updated = [...prev];
-      updated[chapterIndex].lessons[lessonIndex].uploading = true;
-      if (updated[chapterIndex].lessons[lessonIndex].videos[videoIndex]) {
-        updated[chapterIndex].lessons[lessonIndex].videos[videoIndex].progress = 0;
-      }
-      return updated;
-    });
-
-    uploadFile(
-      file,
-      "video",
-      (url) => {
-        setChapters((prev) => {
-          const updated = [...prev];
-          const video = updated[chapterIndex].lessons[lessonIndex].videos[videoIndex];
-          if (video) {
-            video.videoUrl = url;
-            video.progress = 100;
-          }
-          updated[chapterIndex].lessons[lessonIndex].uploading = false;
-          return updated;
-        });
-      },
-      (progress) => {
-        setChapters((prev) => {
-          const updated = [...prev];
-          const video = updated[chapterIndex]?.lessons[lessonIndex]?.videos[videoIndex];
-          if (video) video.progress = progress;
-          return updated;
-        });
-      }
-    );
-  };
-
-  // ================= QUESTION HELPERS =================
   const addQuestion = (chapterIndex: number, lessonIndex: number) => {
     setChapters((prev) => {
       const updated = [...prev];
@@ -316,37 +352,6 @@ export default function CourseBuilder() {
     }));
   };
 
-  const uploadQuestionImage = async (
-    chapterIndex: number | null,
-    lessonIndex: number | null,
-    questionIndex: number,
-    isChapterTest: boolean = false,
-    isCourseTest: boolean = false,
-    file: File | undefined
-  ) => {
-    if (!file) return;
-    uploadFile(file, "image", (imageUrl) => {
-      if (isCourseTest) {
-        setCourseTest((prev) => {
-          const updated = { ...prev };
-          updated.questions[questionIndex].imageUrl = imageUrl;
-          return updated;
-        });
-      } else if (chapterIndex !== null) {
-        setChapters((prev) => {
-          const updated = [...prev];
-          if (isChapterTest) {
-            updated[chapterIndex].test.questions[questionIndex].imageUrl = imageUrl;
-          } else if (lessonIndex !== null) {
-            updated[chapterIndex].lessons[lessonIndex].test.questions[questionIndex].imageUrl = imageUrl;
-          }
-          return updated;
-        });
-      }
-    });
-  };
-
-  // ================= SAVE =================
   const saveCourse = async () => {
     if (!courseTitle.trim()) return alert("Course Title is required!");
 
@@ -422,12 +427,35 @@ export default function CourseBuilder() {
     setChapters(course.chapters || [{ title: "", notesUrl: "", lessons: [], test: { questions: [] } }]);
   };
 
-  // ================= RENDERERS =================
+  const deleteCourse = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this course?")) return;
+    try {
+      await axios.delete(`${API_BASE}/api/courses/${id}`);
+      alert("Course deleted successfully");
+      fetchCourses();
+    } catch (err) {
+      alert("Failed to delete course");
+    }
+  };
+
+  const handleParentChange = (type: string, id: string) => {
+    setParentId(id);
+    if (type === "Class") {
+      const selected = classes.find((c: any) => c._id === id);
+      setSubjects(selected?.subjects || []);
+    }
+    if (type === "Exam") {
+      const selected = exams.find((e: any) => e._id === id);
+      setSubjects(selected?.subjects || []);
+    }
+  };
+
   const renderNotesUploader = (
     label: string,
     currentUrl: string,
     onUpload: (file: File | undefined) => void,
-    isUploading: boolean = false
+    chapterIndex?: number,
+    lessonIndex?: number
   ) => (
     <div className="mt-6 p-5 border rounded-xl bg-white">
       <label className="block text-sm font-medium mb-2">{label}</label>
@@ -437,11 +465,21 @@ export default function CourseBuilder() {
         onChange={(e) => onUpload(e.target.files?.[0])}
         className="w-full border p-3 rounded-xl"
       />
-      {isUploading && <p className="text-blue-600 mt-2">Uploading PDF...</p>}
       {currentUrl && (
-        <a href={currentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-2 mt-3">
-          📄 View/Download Notes PDF
-        </a>
+        <div className="mt-3 flex gap-4">
+          <button 
+            onClick={() => openPreview(currentUrl, "pdf")}
+            className="text-blue-600 hover:underline"
+          >
+            👁️ Preview
+          </button>
+          <button 
+            onClick={() => deleteFile(currentUrl, "PDF", chapterIndex, lessonIndex)}
+            className="text-red-600 hover:underline"
+          >
+            Delete
+          </button>
+        </div>
       )}
     </div>
   );
@@ -515,6 +553,49 @@ export default function CourseBuilder() {
   return (
     <div className="p-10 max-w-7xl mx-auto">
       <h1 className="text-4xl font-bold mb-8">Course Builder</h1>
+
+      {/* Upload Progress Popup */}
+      {uploading && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100]">
+          <div className="bg-white rounded-3xl p-10 w-96 text-center shadow-2xl">
+            <div className="text-5xl mb-6">📤</div>
+            <h3 className="text-2xl font-semibold mb-2">{uploadStatus}</h3>
+            
+            <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden mb-4">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-4 rounded-full transition-all duration-200"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+
+            <p className="text-lg font-medium text-gray-700">{uploadProgress}% Complete</p>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreview && previewUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[110]">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-4xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">
+                {previewType === "video" ? "Video Preview" : "PDF Preview"}
+              </h3>
+              <button onClick={closePreview} className="text-3xl text-gray-500 hover:text-red-600">✕</button>
+            </div>
+
+            {previewType === "video" ? (
+              <video src={previewUrl} controls autoPlay className="w-full rounded-2xl" />
+            ) : (
+              <iframe 
+                src={previewUrl} 
+                className="w-full h-[80vh] border rounded-2xl" 
+                title="PDF Preview"
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white p-8 rounded-2xl shadow-xl">
         {/* Course Image */}
@@ -602,14 +683,18 @@ export default function CourseBuilder() {
                       onChange={(e) => uploadLessonVideo(i, j, vIndex, e.target.files?.[0])}
                       className="w-full border p-3 rounded-xl"
                     />
-                    {video.progress > 0 && <p className="text-center text-sm mt-1">{video.progress}%</p>}
-                    {video.videoUrl && <p className="text-green-600 mt-2">✅ Uploaded</p>}
+                    {video.videoUrl && (
+                      <div className="mt-3 flex gap-4">
+                        <button onClick={() => openPreview(video.videoUrl, "video")} className="text-blue-600 hover:underline">Preview</button>
+                        <button onClick={() => deleteFile(video.videoUrl, "Video", i, j, vIndex)} className="text-red-600 hover:underline">Delete</button>
+                      </div>
+                    )}
                   </div>
                 ))}
 
                 <button onClick={() => addVideo(i, j)} className="bg-indigo-600 text-white px-5 py-2 rounded-lg mb-6">+ Add Video</button>
 
-                {renderNotesUploader("Lesson Notes (PDF)", ls.notesUrl, (file) => uploadLessonNotes(i, j, file), ls.uploading)}
+                {renderNotesUploader("Lesson Notes (PDF)", ls.notesUrl, (file) => uploadLessonNotes(i, j, file), i, j)}
 
                 {/* Lesson Test */}
                 <div className="mt-8">
@@ -629,7 +714,7 @@ export default function CourseBuilder() {
 
             <button onClick={() => addLesson(i)} className="bg-blue-600 text-white px-6 py-3 rounded-lg">+ Add Lesson</button>
 
-            {renderNotesUploader("Chapter Notes (PDF)", ch.notesUrl, (file) => uploadChapterNotes(i, file))}
+            {renderNotesUploader("Chapter Notes (PDF)", ch.notesUrl, (file) => uploadChapterNotes(i, file), i)}
 
             {/* Chapter Test */}
             <div className="mt-10 pt-6 border-t">
@@ -675,7 +760,7 @@ export default function CourseBuilder() {
         </div>
       </div>
 
-      {/* ================= EXISTING COURSES ================= */}
+      {/* Existing Courses */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-4">Existing Courses</h2>
 

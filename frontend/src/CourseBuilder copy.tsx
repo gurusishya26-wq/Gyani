@@ -3,7 +3,7 @@ import axios from "axios";
 
 export default function CourseBuilder() {
   // ================= CONFIG =================
-  const API_BASE = "https://gyani-vxc9.onrender.com/";   // ← Change to production URL when deploying
+  const API_BASE = "http://localhost:5000/";   // ← Change to production URL when deploying
 
   // ================= CORE STATE =================
   const [courseTitle, setCourseTitle] = useState("");
