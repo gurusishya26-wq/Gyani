@@ -18,8 +18,14 @@ mongoose
 // ====================== MIDDLEWARE ======================
 app.use(
   cors({
-    origin: "https://gyani-eight.vercel.app",
+    origin: [
+      "http://localhost:5173",           // Local
+      "https://gyani-eight.vercel.app",  // Vercel
+      "https://gyani-vxc9.onrender.com"  // Render
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
 
