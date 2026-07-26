@@ -148,6 +148,42 @@ const teachers = [
   },
 ];
 
+// Student Testimonials Data
+const testimonials = [
+  {
+    _id: "s1",
+    name: "Ananya Gupta",
+    role: "UPSC CSE 2025 Aspirant",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
+    quote: "The foundation batch completely changed my approach to answer writing. The daily live classes and mentorship from ex-IAS officers made a huge difference.",
+    rating: 5
+  },
+  {
+    _id: "s2",
+    name: "Rahul Mehta",
+    role: "SSC CGL Selected",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
+    quote: "Best platform for SSC preparation. The structured quant and reasoning modules + regular mock tests helped me clear CGL in my first attempt.",
+    rating: 5
+  },
+  {
+    _id: "s3",
+    name: "Priya Singh",
+    role: "Banking Aspirant",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=400",
+    quote: "I was struggling with current affairs and banking awareness. The dedicated modules and weekly quizzes on LearningHub boosted my confidence a lot.",
+    rating: 5
+  },
+  {
+    _id: "s4",
+    name: "Vikram Joshi",
+    role: "CTET Qualified",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
+    quote: "Pedagogy sessions by Anjali ma'am were pure gold. Cleared CTET Paper 1 & 2 with flying colors thanks to the focused content.",
+    rating: 5
+  }
+];
+
 function Home() {
   const navigate = useNavigate();
 
