@@ -218,8 +218,7 @@ function Home() {
 
   //26-07-2026
   // Contact Support Modal
-const [showContactModal, setShowContactModal] = useState(false);
-// Contact Support Modal
+
 const [showContactModal, setShowContactModal] = useState(false);
 const [contactForm, setContactForm] = useState({
   name: "",
