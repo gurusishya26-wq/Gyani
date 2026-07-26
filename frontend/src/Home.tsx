@@ -456,12 +456,12 @@ const fetchDailyQuiz =
       </div>
 
       {/* Mobile - Get Started Button */}
-      <button 
-        onClick={() => setShowModal(true)}
-        className="md:hidden bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-full font-semibold text-sm transition"
-      >
-        Get Started
-      </button>
+<button 
+  onClick={() => setShowModal(true)}
+  className="md:hidden bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition"
+>
+  Get Started
+</button>
     </div>
   </div>
 
