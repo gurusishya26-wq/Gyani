@@ -195,7 +195,8 @@ function Home() {
   const [score, setScore] = useState(0);
 
   // Quiz Modal
- 
+  //26-07-2026
+  const [showLiveStrip, setShowLiveStrip] = useState(true);
 
   // Dynamic Classes
   const [classes, setClasses] = useState<any[]>([]);
@@ -280,6 +281,20 @@ const fetchCompetitiveExams =
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     return () => clearInterval(timer);
   }, [timeLeft]);
+
+  //26-07-2026
+  useEffect(() => {
+  const handleScroll = () => {
+    if (window.scrollY > 80) {
+      setShowLiveStrip(false);
+    } else {
+      setShowLiveStrip(true);
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
 
   useEffect(() => {
   if (showDailyQuizModal) {
@@ -368,37 +383,42 @@ const fetchDailyQuiz =
   return (
     <div className="min-h-screen bg-gray-50">
       {/* LIVE QUIZ STRIP */}
-      <div className="bg-white border-b sticky top-0 z-[60] shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-inner animate-pulse">
-              <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
-              {t.liveNow}
-            </div>
-            <span className="font-semibold text-gray-800 text-sm md:text-base">{t.liveQuizTitle}</span>
-          </div>
-
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <span>👥 {t.studentsJoined}</span>
-            <span>🎯 {t.mediumLevel}</span>
-          </div>
-
-          <div className="flex items-center gap-2 font-mono font-bold text-lg text-red-600">
-            <span>{formatTime(timeLeft)}</span>
-            <span className="text-xs text-gray-500 font-normal">{t.left}</span>
-          </div>
-
-          <button 
-            onClick={() => alert("Redirecting to Live Quiz...")} 
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-2xl font-semibold text-sm transition shadow-md active:scale-95"
-          >
-            {t.joinLiveQuiz}
-          </button>
+      {/* LIVE QUIZ STRIP */}
+{showLiveStrip && (
+  <div className="bg-white border-b sticky top-0 z-[60] shadow-sm transition-all duration-300">
+    <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 bg-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-inner animate-pulse">
+          <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+          {t.liveNow}
         </div>
+        <span className="font-semibold text-gray-800 text-sm md:text-base">{t.liveQuizTitle}</span>
       </div>
 
+      <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
+        <span>👥 {t.studentsJoined}</span>
+        <span>🎯 {t.mediumLevel}</span>
+      </div>
+
+      <div className="flex items-center gap-2 font-mono font-bold text-lg text-red-600">
+        <span>{formatTime(timeLeft)}</span>
+        <span className="text-xs text-gray-500 font-normal">{t.left}</span>
+      </div>
+
+      <button 
+        onClick={() => alert("Redirecting to Live Quiz...")} 
+        className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-2xl font-semibold text-sm transition shadow-md active:scale-95"
+      >
+        {t.joinLiveQuiz}
+      </button>
+    </div>
+  </div>
+)}
+
       {/* HEADER */}
-<header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
+<header className={`bg-white shadow-sm sticky z-50 border-b transition-all duration-300 ${
+  showLiveStrip ? "top-[52px]" : "top-0"
+}`}>
   <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
     
     {/* Left Side - Hamburger + Logo */}
