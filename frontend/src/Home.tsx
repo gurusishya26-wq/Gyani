@@ -398,46 +398,91 @@ const fetchDailyQuiz =
       </div>
 
       {/* HEADER */}
-      <header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-11 h-11 bg-[#5faae0] rounded-3xl flex items-center justify-center text-white font-bold text-3xl shadow-inner">
-              LH
-            </div>
-            <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
-          </div>
+<header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
+  <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    
+    {/* Left Side - Hamburger + Logo */}
+    <div className="flex items-center gap-3">
+      {/* Hamburger (Mobile only) */}
+      <button 
+        onClick={() => setIsMenuOpen(!isMenuOpen)} 
+        className="md:hidden text-2xl text-gray-700"
+      >
+        {isMenuOpen ? '✕' : '☰'}
+      </button>
 
-          <nav className="hidden md:flex items-center gap-10 text-base font-medium text-gray-700">
-            <a href="#courses" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCourses}</a>
-            <a href="#categories" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCategories}</a>
-            <a href="#teachers" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navTeachers}</a>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <GoogleTranslate />
-            <div className="hidden md:flex items-center gap-3">
-              <button onClick={() => setShowModal(true)} className="bg-white border-2 border-[#5faae0] hover:bg-[#f0f9ff] text-[#5faae0] px-6 py-3 rounded-2xl font-semibold transition">
-                {t.startFreeTrial}
-              </button>
-              <button onClick={() => setShowModal(true)} className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-3 rounded-2xl font-semibold transition">
-                {t.signIn}
-              </button>
-            </div>
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden text-3xl text-gray-700">
-              {isMenuOpen ? '✕' : '☰'}
-            </button>
-          </div>
+      {/* Logo */}
+      <div 
+        className="flex items-center gap-2 cursor-pointer" 
+        onClick={() => navigate('/')}
+      >
+        <div className="w-9 h-9 bg-[#5faae0] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-inner">
+          LH
         </div>
+        <span className="font-bold text-xl tracking-tighter text-gray-900 hidden sm:block">
+          {t.logo}
+        </span>
+      </div>
+    </div>
 
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t px-4 py-5 flex flex-col gap-5 text-base font-medium">
-            <a href="#courses">Courses</a>
-            <a href="#categories">Categories</a>
-            <a href="#teachers">Teachers</a>
-            <button onClick={() => setShowModal(true)} className="bg-[#5faae0] text-white py-3 rounded-2xl">Sign In</button>
-          </div>
-        )}
-      </header>
+    {/* Desktop Navigation */}
+    <nav className="hidden md:flex items-center gap-10 text-base font-medium text-gray-700">
+      <a href="#courses" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCourses}</a>
+      <a href="#categories" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCategories}</a>
+      <a href="#teachers" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navTeachers}</a>
+    </nav>
+
+    {/* Right Side */}
+    <div className="flex items-center gap-3">
+      {/* Google Translate */}
+      <div className="scale-90 md:scale-100">
+        <GoogleTranslate />
+      </div>
+
+      {/* Desktop Buttons */}
+      <div className="hidden md:flex items-center gap-3">
+        <button 
+          onClick={() => setShowModal(true)} 
+          className="bg-white border-2 border-[#5faae0] hover:bg-[#f0f9ff] text-[#5faae0] px-5 py-2.5 rounded-2xl font-semibold transition"
+        >
+          {t.startFreeTrial}
+        </button>
+        <button 
+          onClick={() => setShowModal(true)} 
+          className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-5 py-2.5 rounded-2xl font-semibold transition"
+        >
+          {t.signIn}
+        </button>
+      </div>
+
+      {/* Mobile - Get Started Button */}
+      <button 
+        onClick={() => setShowModal(true)}
+        className="md:hidden bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-full font-semibold text-sm transition"
+      >
+        Get Started
+      </button>
+    </div>
+  </div>
+
+  {/* Mobile Menu Dropdown */}
+  {isMenuOpen && (
+    <div className="md:hidden bg-white border-t px-4 py-5 flex flex-col gap-5 text-base font-medium">
+      <a href="#courses" onClick={() => setIsMenuOpen(false)}>Courses</a>
+      <a href="#categories" onClick={() => setIsMenuOpen(false)}>Categories</a>
+      <a href="#teachers" onClick={() => setIsMenuOpen(false)}>Teachers</a>
+      <button 
+        onClick={() => {
+          setShowModal(true);
+          setIsMenuOpen(false);
+        }} 
+        className="bg-[#5faae0] text-white py-3 rounded-2xl"
+      >
+        Sign In
+      </button>
+    </div>
+  )}
+</header>
 
       {/* JOB UPDATES TICKER */}
       <div className="bg-white border-b shadow-sm py-4 overflow-hidden">
