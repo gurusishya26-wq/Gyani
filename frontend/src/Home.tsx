@@ -219,6 +219,8 @@ function Home() {
   //26-07-2026
   // Contact Support Modal
 const [showContactModal, setShowContactModal] = useState(false);
+// Contact Support Modal
+const [showContactModal, setShowContactModal] = useState(false);
 const [contactForm, setContactForm] = useState({
   name: "",
   email: "",
@@ -227,9 +229,8 @@ const [contactForm, setContactForm] = useState({
   message: "",
   attachment: null as File | null,
 });
-const [isSubmitting, setIsSubmitting] = useState(false);
-const [isSubmitted, setIsSubmitted] = useState(false);
-
+const [isContactSubmitting, setIsContactSubmitting] = useState(false);
+const [isContactSubmitted, setIsContactSubmitted] = useState(false);
   const subjects = [
     "Mathematics", "Science", "Physics", "Chemistry", "Biology", 
     "English", "Computer Science", "AI & Robotics", "History", "Geography"
@@ -415,18 +416,18 @@ const handleContactSubmit = async (e: React.FormEvent) => {
     return;
   }
 
-  setIsSubmitting(true);
+  setIsContactSubmitting(true);
 
   try {
     // Temporary success (replace with real API later)
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    setIsSubmitted(true);
+    setIsContactSubmitted(true);
 
     // Auto close after 3 seconds
     setTimeout(() => {
       setShowContactModal(false);
-      setIsSubmitted(false);
+      setIsContactSubmitted(false);
       setContactForm({
         name: "",
         email: "",
@@ -439,7 +440,7 @@ const handleContactSubmit = async (e: React.FormEvent) => {
   } catch (error) {
     alert("Something went wrong. Please try again.");
   } finally {
-    setIsSubmitting(false);
+    setIsContactSubmitting(false);
   }
 };
 
@@ -1476,7 +1477,7 @@ const handleContactSubmit = async (e: React.FormEvent) => {
         <button
           onClick={() => {
             setShowContactModal(false);
-            setIsSubmitted(false);
+            setIsContactSubmitted(false);
           }}
           className="text-3xl text-gray-500 hover:text-red-500 transition"
         >
@@ -1484,7 +1485,7 @@ const handleContactSubmit = async (e: React.FormEvent) => {
         </button>
       </div>
 
-      {isSubmitted ? (
+      {isContactSubmitted ? (
         <div className="p-10 text-center">
           <div className="text-6xl mb-4">✅</div>
           <h4 className="text-xl font-bold text-green-600 mb-3">Thank you!</h4>
@@ -1601,16 +1602,18 @@ const handleContactSubmit = async (e: React.FormEvent) => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isContactSubmitting}
             className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-3.5 rounded-2xl transition disabled:opacity-60"
           >
-            {isSubmitting ? "Submitting..." : "Submit Request"}
+            {isContactSubmitting ? "Submitting..." : "Submit Request"}
           </button>
         </form>
       )}
     </div>
   </div>
 )}
+
+          
     </div>
   );
 }
