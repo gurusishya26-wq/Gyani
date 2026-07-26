@@ -1032,6 +1032,54 @@ const fetchDailyQuiz =
         </div>
       </section>
 
+      {/* ====================== HEAR FROM OUR STUDENTS ====================== */}
+<section className="bg-white py-16 md:py-20">
+  <div className="max-w-6xl mx-auto px-4">
+    <div className="text-center mb-14">
+      <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
+        Hear from our Students
+      </h2>
+      <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+        Real stories from learners who transformed their preparation with LearningHub
+      </p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      {testimonials.map((student) => (
+        <div
+          key={student._id}
+          className="bg-gray-50 rounded-3xl p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
+        >
+          {/* Stars */}
+          <div className="flex gap-1 mb-5">
+            {[...Array(student.rating)].map((_, i) => (
+              <span key={i} className="text-yellow-400 text-xl">★</span>
+            ))}
+          </div>
+
+          {/* Quote */}
+          <p className="text-gray-700 leading-relaxed mb-8 text-[15px]">
+            "{student.quote}"
+          </p>
+
+          {/* Student Info */}
+          <div className="flex items-center gap-4">
+            <img
+              src={student.image}
+              alt={student.name}
+              className="w-14 h-14 rounded-full object-cover border-2 border-white shadow"
+            />
+            <div>
+              <h4 className="font-bold text-gray-900">{student.name}</h4>
+              <p className="text-sm text-[#5faae0] font-medium">{student.role}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
       {/* ====================== FOOTER ====================== */}
       <footer className="bg-gray-900 text-gray-400 py-16">
         <div className="max-w-6xl mx-auto px-4">
