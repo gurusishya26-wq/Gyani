@@ -216,6 +216,20 @@ function Home() {
 
   const t = translations.en;
 
+  //26-07-2026
+  // Contact Support Modal
+const [showContactModal, setShowContactModal] = useState(false);
+const [contactForm, setContactForm] = useState({
+  name: "",
+  email: "",
+  subject: "",
+  category: "",
+  message: "",
+  attachment: null as File | null,
+});
+const [isSubmitting, setIsSubmitting] = useState(false);
+const [isSubmitted, setIsSubmitted] = useState(false);
+
   const subjects = [
     "Mathematics", "Science", "Physics", "Chemistry", "Biology", 
     "English", "Computer Science", "AI & Robotics", "History", "Geography"
@@ -377,6 +391,55 @@ const fetchDailyQuiz =
   const element = document.getElementById(id);
   if (element) {
     element.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
+
+  const handleContactChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
+  setContactForm((prev) => ({ ...prev, [name]: value }));
+};
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files && e.target.files[0]) {
+    setContactForm((prev) => ({ ...prev, attachment: e.target.files![0] }));
+  }
+};
+
+const handleContactSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.category || !contactForm.message) {
+    alert("Please fill all required fields");
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    // Temporary success (replace with real API later)
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    setIsSubmitted(true);
+
+    // Auto close after 3 seconds
+    setTimeout(() => {
+      setShowContactModal(false);
+      setIsSubmitted(false);
+      setContactForm({
+        name: "",
+        email: "",
+        subject: "",
+        category: "",
+        message: "",
+        attachment: null,
+      });
+    }, 3000);
+  } catch (error) {
+    alert("Something went wrong. Please try again.");
+  } finally {
+    setIsSubmitting(false);
   }
 };
 
@@ -622,17 +685,21 @@ const fetchDailyQuiz =
   </div>
 </div>
 
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
-            <div className="h-52 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
-              <span className="text-7xl">🤝</span>
-            </div>
-            <div className="p-8">
-              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Get Help</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Need guidance? Our mentors are here to help you choose the right path.
-              </p>
-            </div>
-          </div>
+          {/* Get Help Card */}
+<div 
+  onClick={() => setShowContactModal(true)}
+  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
+>
+  <div className="h-52 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+    <span className="text-7xl">🤝</span>
+  </div>
+  <div className="p-8">
+    <h3 className="font-semibold text-2xl text-gray-800 mb-3">Get Help</h3>
+    <p className="text-gray-600 leading-relaxed">
+      Need guidance? Our mentors are here to help you choose the right path.
+    </p>
+  </div>
+</div>
         </div>
       </section>
 
@@ -1397,7 +1464,153 @@ const fetchDailyQuiz =
           </div>
         </div>
       )}
+//26-07-2026
+      {/* ====================== CONTACT SUPPORT MODAL ====================== */}
+{showContactModal && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+    <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      
+      {/* Header */}
+      <div className="p-6 border-b flex items-center justify-between bg-gray-50 rounded-t-3xl sticky top-0">
+        <h3 className="text-2xl font-bold text-gray-800">📧 Contact Support</h3>
+        <button
+          onClick={() => {
+            setShowContactModal(false);
+            setIsSubmitted(false);
+          }}
+          className="text-3xl text-gray-500 hover:text-red-500 transition"
+        >
+          ×
+        </button>
+      </div>
 
+      {isSubmitted ? (
+        <div className="p-10 text-center">
+          <div className="text-6xl mb-4">✅</div>
+          <h4 className="text-xl font-bold text-green-600 mb-3">Thank you!</h4>
+          <p className="text-gray-600">
+            Your support request has been received. Our support team will get back to you within 24 hours.
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleContactSubmit} className="p-6 space-y-5">
+          
+          {/* Full Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={contactForm.name}
+              onChange={handleContactChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0]"
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={contactForm.email}
+              onChange={handleContactChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0]"
+              placeholder="your.email@example.com"
+            />
+          </div>
+
+          {/* Subject */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Subject <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="subject"
+              value={contactForm.subject}
+              onChange={handleContactChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0]"
+              placeholder="Brief subject of your issue"
+            />
+          </div>
+
+          {/* Issue Category */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Issue Category <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="category"
+              value={contactForm.category}
+              onChange={handleContactChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0] bg-white"
+            >
+              <option value="">Select category</option>
+              <option value="Login Issue">Login Issue</option>
+              <option value="Payment Issue">Payment Issue</option>
+              <option value="Course Access">Course Access</option>
+              <option value="Technical Issue">Technical Issue</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          {/* Message */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Message <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              name="message"
+              value={contactForm.message}
+              onChange={handleContactChange}
+              required
+              rows={4}
+              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0] resize-none"
+              placeholder="Describe your issue in detail..."
+            />
+          </div>
+
+          {/* Attachment */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Attachment (Optional)
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*,.pdf,.doc,.docx"
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#5faae0] file:text-white hover:file:bg-[#4a9bd4]"
+            />
+            {contactForm.attachment && (
+              <p className="text-xs text-gray-500 mt-1">
+                Selected: {contactForm.attachment.name}
+              </p>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-3.5 rounded-2xl transition disabled:opacity-60"
+          >
+            {isSubmitting ? "Submitting..." : "Submit Request"}
+          </button>
+        </form>
+      )}
+    </div>
+  </div>
+)}
     </div>
   );
 }
