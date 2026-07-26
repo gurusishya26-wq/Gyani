@@ -357,6 +357,13 @@ const fetchDailyQuiz =
       alert(error.message);
     }
   };
+//26-7-2026
+  const scrollToSection = (id: string) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
