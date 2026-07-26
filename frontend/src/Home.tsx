@@ -446,7 +446,6 @@ const handleContactSubmit = async (e: React.FormEvent) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* LIVE QUIZ STRIP */}
-      {/* LIVE QUIZ STRIP */}
 {showLiveStrip && (
   <div className="bg-white border-b sticky top-0 z-[60] shadow-sm transition-all duration-300">
     <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
@@ -478,7 +477,7 @@ const handleContactSubmit = async (e: React.FormEvent) => {
   </div>
 )}
 
-      {/* HEADER */}
+      
       {/* HEADER */}
 <header className={`bg-white shadow-sm sticky z-50 border-b transition-all duration-300 ${
   showLiveStrip ? "top-[52px]" : "top-0"
@@ -1464,7 +1463,7 @@ const handleContactSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
       )}
-//26-07-2026
+
       {/* ====================== CONTACT SUPPORT MODAL ====================== */}
 {showContactModal && (
   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
