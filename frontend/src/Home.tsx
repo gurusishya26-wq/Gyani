@@ -500,45 +500,53 @@ const fetchDailyQuiz =
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Self-Study Card - With Modal Flow */}
-          <div 
-            onClick={() => setShowSelfStudyModal(true)}
-            className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
-          >
-            <div className="h-52 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-              <span className="text-7xl">📖</span>
-            </div>
-            <div className="p-8">
-              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Self-Study</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Learn at your own pace with comprehensive courses on emerging technologies like AI, Robotics, and more.
-              </p>
-            </div>
-          </div>
+          {/* Self-Study Card */}
+<div 
+  onClick={() => scrollToSection("courses")}
+  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
+>
+  <div className="h-52 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+    <span className="text-7xl">📚</span>
+  </div>
+  <div className="p-8">
+    <h3 className="font-semibold text-2xl text-gray-800 mb-3">Self-Study</h3>
+    <p className="text-gray-600 leading-relaxed">
+      Learn at your own pace with comprehensive courses on emerging technologies like AI, Robotics, and more.
+    </p>
+  </div>
+</div>
 
-          {/* Other cards remain the same (you can add onClick later if needed) */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
-            <div className="h-52 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-              <span className="text-7xl">🏛️</span>
-            </div>
-            <div className="p-8">
-              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Government Exams</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Structured preparation for competitive exams like UPSC, SSC, Banking, and more.
-              </p>
-            </div>
-          </div>
+          {/* Government Exams Card */}
+<div 
+  onClick={() => scrollToSection("competitive-exams")}
+  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
+>
+  <div className="h-52 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+    <span className="text-7xl">🏛️</span>
+  </div>
+  <div className="p-8">
+    <h3 className="font-semibold text-2xl text-gray-800 mb-3">Government Exams</h3>
+    <p className="text-gray-600 leading-relaxed">
+      Structured preparation for competitive exams like UPSC, SSC, Banking, and more.
+    </p>
+  </div>
+</div>
 
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
-            <div className="h-52 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
-              <span className="text-7xl">💻</span>
-            </div>
-            <div className="p-8">
-              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Online Tuition</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Live interactive classes with experienced teachers from anywhere.
-              </p>
-            </div>
-          </div>
+          {/* Online Tuition Card */}
+<div 
+  onClick={() => scrollToSection("online-tuition")}
+  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
+>
+  <div className="h-52 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
+    <span className="text-7xl">💻</span>
+  </div>
+  <div className="p-8">
+    <h3 className="font-semibold text-2xl text-gray-800 mb-3">Online Tuition</h3>
+    <p className="text-gray-600 leading-relaxed">
+      Live interactive classes with experienced teachers from anywhere.
+    </p>
+  </div>
+</div>
 
           <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
             <div className="h-52 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
@@ -642,7 +650,7 @@ const fetchDailyQuiz =
 
       
       {/* ====================== COMPETITIVE EXAMS ====================== */}
-      <section className="bg-gray-50 py-16">
+      <section id="competitive-exams" className="bg-gray-50 py-16">
         <div className="max-w-6xl mx-auto px-4">
           
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">
@@ -829,7 +837,7 @@ const fetchDailyQuiz =
       </section>
 
       {/* ====================== ONLINE TUITION CLASSES ====================== */}
-      <section className="bg-white py-16 md:py-24">
+      <section id="online-tuition" className="bg-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-16">
