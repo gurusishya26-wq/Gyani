@@ -6,7 +6,7 @@ export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const API_BASE = "http://localhost:5000";
+  const API_BASE = "https://gyani-vxc9.onrender.com";
 
   const [course, setCourse] = useState<any>(null);
   const [classes, setClasses] = useState<any[]>([]);
