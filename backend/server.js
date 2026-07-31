@@ -148,7 +148,7 @@ app.get("/api/get-razorpay-key", (req, res) => {
 
 // ====================== OTHER ROUTES ======================
 const uploadRoutes = require("./src/routes/uploadRoutes");
-const deleteRoutes = require("./src/routes/deleteRoutes");
+// const deleteRoutes = require("./src/routes/deleteRoutes");
 const classRoutes = require("./src/routes/classRoutes");
 const competitiveExamRoutes = require("./src/routes/competitiveExamRoutes");
 const dailyQuizRoutes = require("./src/routes/dailyQuizRoutes");
@@ -156,7 +156,7 @@ const courseRoutes = require("./src/routes/courseRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
 
 app.use("/api", uploadRoutes);
-app.use("/api", deleteRoutes);
+// app.use("/api", deleteRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/competitive-exams", competitiveExamRoutes);
