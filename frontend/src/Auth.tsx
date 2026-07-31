@@ -12,7 +12,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_BASE = "http://localhost:5000";
+  const API_BASE = "https://gyani-vxc9.onrender.com";
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
