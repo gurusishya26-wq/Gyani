@@ -9,6 +9,7 @@ import CourseDetail from './components/CourseDetail.js';
 import TestPage from './components/TestPage.js';
 import AdminPanel from "./AdminPanel.js";
 import CourseBuilder from './CourseBuilder.js';
+import Auth from "./Auth.js";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           element={<AdminPanel />}
         />
         <Route path="/admin/course-builder" element={<CourseBuilder />} />
+        <Route path="/auth" element={<Auth />} />
       </Routes>
     </Router>
   );
