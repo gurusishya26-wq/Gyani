@@ -148,42 +148,6 @@ const teachers = [
   },
 ];
 
-// Student Testimonials Data
-const testimonials = [
-  {
-    _id: "s1",
-    name: "Ananya Gupta",
-    role: "UPSC CSE 2025 Aspirant",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-    quote: "The foundation batch completely changed my approach to answer writing. The daily live classes and mentorship from ex-IAS officers made a huge difference.",
-    rating: 5
-  },
-  {
-    _id: "s2",
-    name: "Rahul Mehta",
-    role: "SSC CGL Selected",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
-    quote: "Best platform for SSC preparation. The structured quant and reasoning modules + regular mock tests helped me clear CGL in my first attempt.",
-    rating: 5
-  },
-  {
-    _id: "s3",
-    name: "Priya Singh",
-    role: "Banking Aspirant",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=400",
-    quote: "I was struggling with current affairs and banking awareness. The dedicated modules and weekly quizzes on LearningHub boosted my confidence a lot.",
-    rating: 5
-  },
-  {
-    _id: "s4",
-    name: "Vikram Joshi",
-    role: "CTET Qualified",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
-    quote: "Pedagogy sessions by Anjali ma'am were pure gold. Cleared CTET Paper 1 & 2 with flying colors thanks to the focused content.",
-    rating: 5
-  }
-];
-
 function Home() {
   const navigate = useNavigate();
 
@@ -195,8 +159,7 @@ function Home() {
   const [score, setScore] = useState(0);
 
   // Quiz Modal
-  //26-07-2026
-  const [showLiveStrip, setShowLiveStrip] = useState(true);
+ 
 
   // Dynamic Classes
   const [classes, setClasses] = useState<any[]>([]);
@@ -216,20 +179,6 @@ function Home() {
 
   const t = translations.en;
 
-  //26-07-2026
-  // Contact Support Modal
-
-const [showContactModal, setShowContactModal] = useState(false);
-const [contactForm, setContactForm] = useState({
-  name: "",
-  email: "",
-  subject: "",
-  category: "",
-  message: "",
-  attachment: null as File | null,
-});
-const [isContactSubmitting, setIsContactSubmitting] = useState(false);
-const [isContactSubmitted, setIsContactSubmitted] = useState(false);
   const subjects = [
     "Mathematics", "Science", "Physics", "Chemistry", "Biology", 
     "English", "Computer Science", "AI & Robotics", "History", "Geography"
@@ -242,7 +191,7 @@ const [isContactSubmitted, setIsContactSubmitted] = useState(false);
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("https://gyani-vxc9.onrender.com/api/classes");
+      const res = await axios.get("http://localhost:5000/api/classes");
       setClasses(res.data);
     } catch (error) {
       console.error("Error fetching classes:", error);
@@ -268,7 +217,7 @@ const fetchCompetitiveExams =
     try {
       const res =
         await axios.get(
-          "https://gyani-vxc9.onrender.com/api/competitive-exams"
+          "http://localhost:5000/api/competitive-exams"
         );
 
       setCompetitiveExams(
@@ -296,20 +245,6 @@ const fetchCompetitiveExams =
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  //26-07-2026
-  useEffect(() => {
-  const handleScroll = () => {
-    if (window.scrollY > 80) {
-      setShowLiveStrip(false);
-    } else {
-      setShowLiveStrip(true);
-    }
-  };
-
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
-
   useEffect(() => {
   if (showDailyQuizModal) {
     fetchDailyQuiz();
@@ -321,7 +256,7 @@ const fetchDailyQuiz =
     try {
       const res =
         await axios.get(
-          "https://gyani-vxc9.onrender.com/api/daily-quizzes/random"
+          "http://localhost:5000/api/daily-quizzes/random"
         );
 
         console.log("RANDOM QUIZ:", res.data);
@@ -370,7 +305,7 @@ const fetchDailyQuiz =
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      await axios.post("https://gyani-vxc9.onrender.com/api/save-user", {
+      await axios.post("http://localhost:5000/api/save-user", {
         name: user.displayName,
         email: user.email
       });
@@ -386,194 +321,80 @@ const fetchDailyQuiz =
       alert(error.message);
     }
   };
-//26-7-2026
-  const scrollToSection = (id: string) => {
-  const element = document.getElementById(id);
-  if (element) {
-    element.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-};
-
-  const handleContactChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-) => {
-  const { name, value } = e.target;
-  setContactForm((prev) => ({ ...prev, [name]: value }));
-};
-
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (e.target.files && e.target.files[0]) {
-    setContactForm((prev) => ({ ...prev, attachment: e.target.files![0] }));
-  }
-};
-
-const handleContactSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.category || !contactForm.message) {
-    alert("Please fill all required fields");
-    return;
-  }
-
-  setIsContactSubmitting(true);
-
-  try {
-    // Temporary success (replace with real API later)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setIsContactSubmitted(true);
-
-    // Auto close after 3 seconds
-    setTimeout(() => {
-      setShowContactModal(false);
-      setIsContactSubmitted(false);
-      setContactForm({
-        name: "",
-        email: "",
-        subject: "",
-        category: "",
-        message: "",
-        attachment: null,
-      });
-    }, 3000);
-  } catch (error) {
-    alert("Something went wrong. Please try again.");
-  } finally {
-    setIsContactSubmitting(false);
-  }
-};
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* LIVE QUIZ STRIP */}
-{showLiveStrip && (
-  <div className="bg-white border-b sticky top-0 z-[60] shadow-sm transition-all duration-300">
-    <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 bg-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-inner animate-pulse">
-          <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
-          {t.liveNow}
+      <div className="bg-white border-b sticky top-0 z-[60] shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-inner animate-pulse">
+              <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+              {t.liveNow}
+            </div>
+            <span className="font-semibold text-gray-800 text-sm md:text-base">{t.liveQuizTitle}</span>
+          </div>
+
+          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
+            <span>👥 {t.studentsJoined}</span>
+            <span>🎯 {t.mediumLevel}</span>
+          </div>
+
+          <div className="flex items-center gap-2 font-mono font-bold text-lg text-red-600">
+            <span>{formatTime(timeLeft)}</span>
+            <span className="text-xs text-gray-500 font-normal">{t.left}</span>
+          </div>
+
+          <button 
+            onClick={() => alert("Redirecting to Live Quiz...")} 
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-2xl font-semibold text-sm transition shadow-md active:scale-95"
+          >
+            {t.joinLiveQuiz}
+          </button>
         </div>
-        <span className="font-semibold text-gray-800 text-sm md:text-base">{t.liveQuizTitle}</span>
       </div>
 
-      <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-        <span>👥 {t.studentsJoined}</span>
-        <span>🎯 {t.mediumLevel}</span>
-      </div>
-
-      <div className="flex items-center gap-2 font-mono font-bold text-lg text-red-600">
-        <span>{formatTime(timeLeft)}</span>
-        <span className="text-xs text-gray-500 font-normal">{t.left}</span>
-      </div>
-
-      <button 
-        onClick={() => alert("Redirecting to Live Quiz...")} 
-        className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-2xl font-semibold text-sm transition shadow-md active:scale-95"
-      >
-        {t.joinLiveQuiz}
-      </button>
-    </div>
-  </div>
-)}
-
-      
       {/* HEADER */}
-<header className={`bg-white shadow-sm sticky z-50 border-b transition-all duration-300 ${
-  showLiveStrip ? "top-[52px]" : "top-0"
-}`}>
-  <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-    
-    {/* Left Side - Hamburger + Logo */}
-    <div className="flex items-center gap-3">
-      <button 
-        onClick={() => setIsMenuOpen(!isMenuOpen)} 
-        className="md:hidden text-2xl text-gray-700"
-      >
-        {isMenuOpen ? '✕' : '☰'}
-      </button>
+      <header className="bg-white shadow-sm sticky top-[52px] z-50 border-b">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+            <div className="w-11 h-11 bg-[#5faae0] rounded-3xl flex items-center justify-center text-white font-bold text-3xl shadow-inner">
+              LH
+            </div>
+            <span className="font-bold text-2xl tracking-tighter text-gray-900">{t.logo}</span>
+          </div>
 
-      <div 
-        className="flex items-center gap-2 cursor-pointer" 
-        onClick={() => navigate('/')}
-      >
-        <div className="w-9 h-9 bg-[#5faae0] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-inner">
-          LH
+          <nav className="hidden md:flex items-center gap-10 text-base font-medium text-gray-700">
+            <a href="#courses" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCourses}</a>
+            <a href="#categories" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCategories}</a>
+            <a href="#teachers" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navTeachers}</a>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <GoogleTranslate />
+            <div className="hidden md:flex items-center gap-3">
+              <button onClick={() => setShowModal(true)} className="bg-white border-2 border-[#5faae0] hover:bg-[#f0f9ff] text-[#5faae0] px-6 py-3 rounded-2xl font-semibold transition">
+                {t.startFreeTrial}
+              </button>
+              <button onClick={() => setShowModal(true)} className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-3 rounded-2xl font-semibold transition">
+                {t.signIn}
+              </button>
+            </div>
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden text-3xl text-gray-700">
+              {isMenuOpen ? '✕' : '☰'}
+            </button>
+          </div>
         </div>
-        <span className="font-bold text-xl tracking-tighter text-gray-900 hidden sm:block">
-          {t.logo}
-        </span>
-      </div>
-    </div>
 
-    {/* Desktop Navigation */}
-    <nav className="hidden md:flex items-center gap-10 text-base font-medium text-gray-700">
-      <a href="#courses" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCourses}</a>
-      <a href="#categories" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navCategories}</a>
-      <a href="#teachers" className="hover:text-[#5faae0] transition-colors cursor-pointer">{t.navTeachers}</a>
-    </nav>
-
-    {/* Right Side */}
-    <div className="flex items-center gap-3">
-      <div className="scale-90 md:scale-100">
-        <GoogleTranslate />
-      </div>
-
-      <div className="hidden md:flex items-center gap-3">
-        <button 
-          onClick={() => setShowModal(true)} 
-          className="bg-white border-2 border-[#5faae0] hover:bg-[#f0f9ff] text-[#5faae0] px-5 py-2.5 rounded-2xl font-semibold transition"
-        >
-          {t.startFreeTrial}
-        </button>
-        <button 
-          onClick={() => setShowModal(true)} 
-          className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-5 py-2.5 rounded-2xl font-semibold transition"
-        >
-          {t.signIn}
-        </button>
-      </div>
-
-      {/* Mobile - Get Started Button */}
-      <button 
-        onClick={() => setShowModal(true)}
-        className="md:hidden bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition"
-      >
-        Get Started
-      </button>
-    </div>
-  </div>
-
-  {/* Mobile Menu Dropdown */}
-  {isMenuOpen && (
-    <div className="md:hidden bg-white border-t px-4 py-5 flex flex-col gap-5 text-base font-medium">
-      <a href="#courses" onClick={() => setIsMenuOpen(false)}>Courses</a>
-      <a href="#categories" onClick={() => setIsMenuOpen(false)}>Categories</a>
-      <a href="#teachers" onClick={() => setIsMenuOpen(false)}>Teachers</a>
-      
-      <div className="flex items-center justify-between">
-        <span>Languages</span>
-        <div className="scale-90">
-          <GoogleTranslate />
-        </div>
-      </div>
-
-      <button 
-        onClick={() => {
-          setShowModal(true);
-          setIsMenuOpen(false);
-        }} 
-        className="bg-[#5faae0] text-white py-3 rounded-2xl"
-      >
-        Sign In
-      </button>
-    </div>
-  )}
-</header>
-
-
-
-
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t px-4 py-5 flex flex-col gap-5 text-base font-medium">
+            <a href="#courses">Courses</a>
+            <a href="#categories">Categories</a>
+            <a href="#teachers">Teachers</a>
+            <button onClick={() => setShowModal(true)} className="bg-[#5faae0] text-white py-3 rounded-2xl">Sign In</button>
+          </div>
+        )}
+      </header>
 
       {/* JOB UPDATES TICKER */}
       <div className="bg-white border-b shadow-sm py-4 overflow-hidden">
@@ -636,69 +457,57 @@ const handleContactSubmit = async (e: React.FormEvent) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Self-Study Card - With Modal Flow */}
-          {/* Self-Study Card */}
-<div 
-  onClick={() => scrollToSection("courses")}
-  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
->
-  <div className="h-52 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-    <span className="text-7xl">📚</span>
-  </div>
-  <div className="p-8">
-    <h3 className="font-semibold text-2xl text-gray-800 mb-3">Self-Study</h3>
-    <p className="text-gray-600 leading-relaxed">
-      Learn at your own pace with comprehensive courses on emerging technologies like AI, Robotics, and more.
-    </p>
-  </div>
-</div>
+          <div 
+            onClick={() => setShowSelfStudyModal(true)}
+            className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
+          >
+            <div className="h-52 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+              <span className="text-7xl">📖</span>
+            </div>
+            <div className="p-8">
+              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Self-Study</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Learn at your own pace with comprehensive courses on emerging technologies like AI, Robotics, and more.
+              </p>
+            </div>
+          </div>
 
-          {/* Government Exams Card */}
-<div 
-  onClick={() => scrollToSection("competitive-exams")}
-  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
->
-  <div className="h-52 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-    <span className="text-7xl">🏛️</span>
-  </div>
-  <div className="p-8">
-    <h3 className="font-semibold text-2xl text-gray-800 mb-3">Government Exams</h3>
-    <p className="text-gray-600 leading-relaxed">
-      Structured preparation for competitive exams like UPSC, SSC, Banking, and more.
-    </p>
-  </div>
-</div>
+          {/* Other cards remain the same (you can add onClick later if needed) */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
+            <div className="h-52 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+              <span className="text-7xl">🏛️</span>
+            </div>
+            <div className="p-8">
+              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Government Exams</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Structured preparation for competitive exams like UPSC, SSC, Banking, and more.
+              </p>
+            </div>
+          </div>
 
-          {/* Online Tuition Card */}
-<div 
-  onClick={() => scrollToSection("online-tuition")}
-  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
->
-  <div className="h-52 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
-    <span className="text-7xl">💻</span>
-  </div>
-  <div className="p-8">
-    <h3 className="font-semibold text-2xl text-gray-800 mb-3">Online Tuition</h3>
-    <p className="text-gray-600 leading-relaxed">
-      Live interactive classes with experienced teachers from anywhere.
-    </p>
-  </div>
-</div>
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
+            <div className="h-52 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
+              <span className="text-7xl">💻</span>
+            </div>
+            <div className="p-8">
+              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Online Tuition</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Live interactive classes with experienced teachers from anywhere.
+              </p>
+            </div>
+          </div>
 
-          {/* Get Help Card */}
-<div 
-  onClick={() => setShowContactModal(true)}
-  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer"
->
-  <div className="h-52 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
-    <span className="text-7xl">🤝</span>
-  </div>
-  <div className="p-8">
-    <h3 className="font-semibold text-2xl text-gray-800 mb-3">Get Help</h3>
-    <p className="text-gray-600 leading-relaxed">
-      Need guidance? Our mentors are here to help you choose the right path.
-    </p>
-  </div>
-</div>
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group cursor-pointer">
+            <div className="h-52 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+              <span className="text-7xl">🤝</span>
+            </div>
+            <div className="p-8">
+              <h3 className="font-semibold text-2xl text-gray-800 mb-3">Get Help</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Need guidance? Our mentors are here to help you choose the right path.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -790,7 +599,7 @@ const handleContactSubmit = async (e: React.FormEvent) => {
 
       
       {/* ====================== COMPETITIVE EXAMS ====================== */}
-      <section id="competitive-exams" className="bg-gray-50 py-16">
+      <section className="bg-gray-50 py-16">
         <div className="max-w-6xl mx-auto px-4">
           
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800">
@@ -977,7 +786,7 @@ const handleContactSubmit = async (e: React.FormEvent) => {
       </section>
 
       {/* ====================== ONLINE TUITION CLASSES ====================== */}
-      <section id="online-tuition" className="bg-white py-16 md:py-24">
+      <section className="bg-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-16">
@@ -1186,54 +995,6 @@ const handleContactSubmit = async (e: React.FormEvent) => {
           ))}
         </div>
       </section>
-
-      {/* ====================== HEAR FROM OUR STUDENTS ====================== */}
-<section className="bg-white py-16 md:py-20">
-  <div className="max-w-6xl mx-auto px-4">
-    <div className="text-center mb-14">
-      <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
-        Hear from our Students
-      </h2>
-      <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-        Real stories from learners who transformed their preparation with LearningHub
-      </p>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      {testimonials.map((student) => (
-        <div
-          key={student._id}
-          className="bg-gray-50 rounded-3xl p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
-        >
-          {/* Stars */}
-          <div className="flex gap-1 mb-5">
-            {[...Array(student.rating)].map((_, i) => (
-              <span key={i} className="text-yellow-400 text-xl">★</span>
-            ))}
-          </div>
-
-          {/* Quote */}
-          <p className="text-gray-700 leading-relaxed mb-8 text-[15px]">
-            "{student.quote}"
-          </p>
-
-          {/* Student Info */}
-          <div className="flex items-center gap-4">
-            <img
-              src={student.image}
-              alt={student.name}
-              className="w-14 h-14 rounded-full object-cover border-2 border-white shadow"
-            />
-            <div>
-              <h4 className="font-bold text-gray-900">{student.name}</h4>
-              <p className="text-sm text-[#5faae0] font-medium">{student.role}</p>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
 
       {/* ====================== FOOTER ====================== */}
       <footer className="bg-gray-900 text-gray-400 py-16">
@@ -1464,154 +1225,6 @@ const handleContactSubmit = async (e: React.FormEvent) => {
         </div>
       )}
 
-      {/* ====================== CONTACT SUPPORT MODAL ====================== */}
-{showContactModal && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-    <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-      
-      {/* Header */}
-      <div className="p-6 border-b flex items-center justify-between bg-gray-50 rounded-t-3xl sticky top-0">
-        <h3 className="text-2xl font-bold text-gray-800">📧 Contact Support</h3>
-        <button
-          onClick={() => {
-            setShowContactModal(false);
-            setIsContactSubmitted(false);
-          }}
-          className="text-3xl text-gray-500 hover:text-red-500 transition"
-        >
-          ×
-        </button>
-      </div>
-
-      {isContactSubmitted ? (
-        <div className="p-10 text-center">
-          <div className="text-6xl mb-4">✅</div>
-          <h4 className="text-xl font-bold text-green-600 mb-3">Thank you!</h4>
-          <p className="text-gray-600">
-            Your support request has been received. Our support team will get back to you within 24 hours.
-          </p>
-        </div>
-      ) : (
-        <form onSubmit={handleContactSubmit} className="p-6 space-y-5">
-          
-          {/* Full Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={contactForm.name}
-              onChange={handleContactChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0]"
-              placeholder="Enter your full name"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={contactForm.email}
-              onChange={handleContactChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0]"
-              placeholder="your.email@example.com"
-            />
-          </div>
-
-          {/* Subject */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Subject <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="subject"
-              value={contactForm.subject}
-              onChange={handleContactChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0]"
-              placeholder="Brief subject of your issue"
-            />
-          </div>
-
-          {/* Issue Category */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Issue Category <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="category"
-              value={contactForm.category}
-              onChange={handleContactChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0] bg-white"
-            >
-              <option value="">Select category</option>
-              <option value="Login Issue">Login Issue</option>
-              <option value="Payment Issue">Payment Issue</option>
-              <option value="Course Access">Course Access</option>
-              <option value="Technical Issue">Technical Issue</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          {/* Message */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Message <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              name="message"
-              value={contactForm.message}
-              onChange={handleContactChange}
-              required
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#5faae0] resize-none"
-              placeholder="Describe your issue in detail..."
-            />
-          </div>
-
-          {/* Attachment */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Attachment (Optional)
-            </label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*,.pdf,.doc,.docx"
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#5faae0] file:text-white hover:file:bg-[#4a9bd4]"
-            />
-            {contactForm.attachment && (
-              <p className="text-xs text-gray-500 mt-1">
-                Selected: {contactForm.attachment.name}
-              </p>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isContactSubmitting}
-            className="w-full bg-[#5faae0] hover:bg-[#4a9bd4] text-white font-semibold py-3.5 rounded-2xl transition disabled:opacity-60"
-          >
-            {isContactSubmitting ? "Submitting..." : "Submit Request"}
-          </button>
-        </form>
-      )}
-    </div>
-  </div>
-)}
-
-          
     </div>
   );
 }

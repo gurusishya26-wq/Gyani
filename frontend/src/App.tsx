@@ -10,6 +10,7 @@ import TestPage from './components/TestPage.js';
 import AdminPanel from "./AdminPanel.js";
 import CourseBuilder from './CourseBuilder.js';
 import Auth from "./Auth.js";
+import MyCourses from "./MyCourses.js";
 
 function App() {
   return (
@@ -30,6 +31,8 @@ function App() {
         />
         <Route path="/admin/course-builder" element={<CourseBuilder />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/my-courses" element={<MyCourses />} />
+        
       </Routes>
     </Router>
   );

@@ -89,7 +89,7 @@ export default function CourseBuilder() {
   };
 
   // ================= DELETE FILE =================
-  const deleteFile = async (fileUrl: string, type: string, chapterIndex?: number, lessonIndex?: number, videoIndex?: number) => {
+  const deleteFile = async (fileUrl: string, type: string, chapterIndex?: number, lessonIndex?: number, videoIndex?: number, questionIndex?: number, isCourseQuestion?: boolean) => {
     if (!window.confirm(`Delete this ${type}?`)) return;
 
     try {
@@ -97,28 +97,64 @@ export default function CourseBuilder() {
         data: { videoUrl: fileUrl }
       });
 
-      // Update UI based on type
-      setChapters((prev) => {
-        const updated = [...prev];
-
-        if (type === "Video" && chapterIndex !== undefined && lessonIndex !== undefined && videoIndex !== undefined) {
-          // Delete Video
-          updated[chapterIndex].lessons[lessonIndex].videos.splice(videoIndex, 1);
-        } 
-        else if (type === "PDF") {
-          // Delete PDF
+      // Update UI
+      if (type === "Course Thumbnail") {
+        setCourseImage("");
+      } else if (type === "Intro Video") {
+        setIntroVideo("");
+      } else if (type === "Question Image") {
+        setChapters((prev) => {
+          const updated = [...prev];
+          if (isCourseQuestion && questionIndex !== undefined) {
+            // Course Question
+            setCourseTest((prevTest) => {
+              const newTest = { ...prevTest };
+              if (newTest.questions[questionIndex]) {
+                newTest.questions[questionIndex].imageUrl = "";
+              }
+              return newTest;
+            });
+          } else if (chapterIndex !== undefined && questionIndex !== undefined) {
+            // Chapter or Lesson Question
+            if (lessonIndex !== undefined) {
+              // Lesson Question
+              if (updated[chapterIndex]?.lessons?.[lessonIndex]?.test?.questions?.[questionIndex]) {
+                updated[chapterIndex].lessons[lessonIndex].test.questions[questionIndex].imageUrl = "";
+              }
+            } else {
+              // Chapter Question
+              if (updated[chapterIndex]?.test?.questions?.[questionIndex]) {
+                updated[chapterIndex].test.questions[questionIndex].imageUrl = "";
+              }
+            }
+          }
+          return updated;
+        });
+      } else if (type === "Video" && chapterIndex !== undefined && lessonIndex !== undefined && videoIndex !== undefined) {
+        setChapters((prev) => {
+          const updated = [...prev];
+          if (updated[chapterIndex]?.lessons?.[lessonIndex]?.videos) {
+            updated[chapterIndex].lessons[lessonIndex].videos.splice(videoIndex, 1);
+          }
+          return updated;
+        });
+      } else if (type === "PDF") {
+        setChapters((prev) => {
+          const updated = [...prev];
           if (chapterIndex !== undefined) {
             if (lessonIndex !== undefined) {
-              updated[chapterIndex].lessons[lessonIndex].notesUrl = "";
+              if (updated[chapterIndex]?.lessons?.[lessonIndex]) {
+                updated[chapterIndex].lessons[lessonIndex].notesUrl = "";
+              }
             } else {
               updated[chapterIndex].notesUrl = "";
             }
           } else {
             setCourseNotesUrl("");
           }
-        }
-        return updated;
-      });
+          return updated;
+        });
+      }
 
       alert(`${type} deleted successfully`);
     } catch (err) {
@@ -233,16 +269,22 @@ export default function CourseBuilder() {
       if (isCourseTest) {
         setCourseTest((prev) => {
           const updated = { ...prev };
-          updated.questions[questionIndex].imageUrl = imageUrl;
+          if (updated.questions[questionIndex]) {
+            updated.questions[questionIndex].imageUrl = imageUrl;
+          }
           return updated;
         });
       } else if (chapterIndex !== null) {
         setChapters((prev) => {
           const updated = [...prev];
           if (isChapterTest) {
-            updated[chapterIndex].test.questions[questionIndex].imageUrl = imageUrl;
+            if (updated[chapterIndex]?.test?.questions?.[questionIndex]) {
+              updated[chapterIndex].test.questions[questionIndex].imageUrl = imageUrl;
+            }
           } else if (lessonIndex !== null) {
-            updated[chapterIndex].lessons[lessonIndex].test.questions[questionIndex].imageUrl = imageUrl;
+            if (updated[chapterIndex]?.lessons?.[lessonIndex]?.test?.questions?.[questionIndex]) {
+              updated[chapterIndex].lessons[lessonIndex].test.questions[questionIndex].imageUrl = imageUrl;
+            }
           }
           return updated;
         });
@@ -508,8 +550,14 @@ export default function CourseBuilder() {
           className="w-full border p-3 rounded-xl"
         />
         {q.imageUrl && (
-          <div className="mt-3">
+          <div className="mt-3 flex gap-4">
             <img src={q.imageUrl} alt="Question" className="max-w-full h-auto border rounded-lg shadow" />
+            <button 
+              onClick={() => deleteFile(q.imageUrl, "Question Image", chapterIndex, lessonIndex, undefined, qIndex, isCourseTest)}
+              className="text-red-600 hover:underline text-sm self-start mt-1"
+            >
+              Delete Image
+            </button>
           </div>
         )}
       </div>
@@ -607,7 +655,17 @@ export default function CourseBuilder() {
             onChange={(e) => uploadCourseImage(e.target.files?.[0])}
             className="w-full border p-3 rounded-xl"
           />
-          {courseImage && <img src={courseImage} alt="Thumbnail" className="mt-4 w-48 h-32 object-cover rounded-xl" />}
+          {courseImage && (
+            <div className="mt-4 flex items-center gap-4">
+              <img src={courseImage} alt="Thumbnail" className="w-48 h-32 object-cover rounded-xl" />
+              <button 
+                onClick={() => deleteFile(courseImage, "Course Thumbnail")}
+                className="text-red-600 hover:underline"
+              >
+                Delete Thumbnail
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Intro Video */}
@@ -619,7 +677,12 @@ export default function CourseBuilder() {
             onChange={(e) => uploadIntroVideo(e.target.files?.[0])}
             className="w-full border p-3 rounded-xl"
           />
-          {introVideo && <p className="text-green-600 mt-2">✅ Intro Video Uploaded</p>}
+          {introVideo && (
+            <div className="mt-3 flex gap-4">
+              <button onClick={() => openPreview(introVideo, "video")} className="text-blue-600 hover:underline">Preview</button>
+              <button onClick={() => deleteFile(introVideo, "Intro Video")} className="text-red-600 hover:underline">Delete</button>
+            </div>
+          )}
         </div>
 
         <input value={courseTitle} onChange={(e) => setCourseTitle(e.target.value)} placeholder="Course Title" className="w-full border p-4 rounded-xl mb-4" />
