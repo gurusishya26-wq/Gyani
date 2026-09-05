@@ -30,7 +30,7 @@ export default function TestPage() {
         setLoading(true);
 
         // Fixed URL (removed double slash)
-        const res = await axios.get(`${API_BASE}/api/courses/${courseId}`);
+        const res = await axios.get(`https://gyani-vxc9.onrender.com/api/courses/${courseId}`);
         const course = res.data;
         setCourseTitle(course.title || "");
 
