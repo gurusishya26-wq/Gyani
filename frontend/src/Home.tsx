@@ -376,7 +376,10 @@ const fetchDailyQuiz =
               <button onClick={() => setShowModal(true)} className="bg-white border-2 border-[#5faae0] hover:bg-[#f0f9ff] text-[#5faae0] px-6 py-3 rounded-2xl font-semibold transition">
                 {t.startFreeTrial}
               </button>
-              <button onClick={() => setShowModal(true)} className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-3 rounded-2xl font-semibold transition">
+              <button
+                onClick={() => navigate('/auth')}
+                className="bg-[#5faae0] hover:bg-[#4a9bd4] text-white px-6 py-3 rounded-2xl font-semibold transition"
+              >
                 {t.signIn}
               </button>
             </div>
@@ -391,7 +394,15 @@ const fetchDailyQuiz =
             <a href="#courses">Courses</a>
             <a href="#categories">Categories</a>
             <a href="#teachers">Teachers</a>
-            <button onClick={() => setShowModal(true)} className="bg-[#5faae0] text-white py-3 rounded-2xl">Sign In</button>
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);   // optional: close the menu
+                navigate('/auth');
+              }}
+              className="bg-[#5faae0] text-white py-3 rounded-2xl"
+            >
+              Sign In
+            </button>
           </div>
         )}
       </header>
