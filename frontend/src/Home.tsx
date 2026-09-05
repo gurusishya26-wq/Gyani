@@ -2,10 +2,14 @@
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import axios from "axios";
+// changes 05.09.2026
+const API_URL = import.meta.env.VITE_API_URL;
 
 import { auth, googleProvider } from "./firebase";
 import { signInWithPopup } from "firebase/auth";
 import GoogleTranslate from "./components/GoogleTranslate";
+
+
 
 // ==================== TRANSLATIONS ====================
 const translations = {
@@ -191,7 +195,7 @@ function Home() {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/classes");
+      const res = await axios.get(`${API_URL}/api/classes");
       setClasses(res.data);
     } catch (error) {
       console.error("Error fetching classes:", error);
